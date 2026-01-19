@@ -1,102 +1,122 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
-
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
-
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
-
-  return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Search, Bot, Newspaper, Terminal, Send } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.dev/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+    <main className="flex min-h-screen flex-col">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 items-center gap-4 px-4 md:px-6 mx-auto">
+          <div className="flex items-center gap-2 font-bold text-xl">
+            <div className="bg-primary text-primary-foreground p-1 rounded-lg">
+              <Bot className="h-6 w-6" />
+            </div>
+            <span>Ailar</span>
+          </div>
+          <nav className="flex-1 hidden md:flex items-center gap-6 text-sm font-medium">
+            <a href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Katalog</a>
+            <a href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Yangiliklar</a>
+            <a href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Promptlar</a>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm">Kirish</Button>
+            <Button size="sm">Ro'yxatdan o'tish</Button>
+          </div>
         </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.dev?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.dev →
-        </a>
+      </header>
+
+      {/* Hero */}
+      <section className="flex-1 py-12 md:py-24 lg:py-32 flex flex-col items-center text-center space-y-4 px-4 md:px-6 bg-gradient-to-b from-background to-muted/50">
+        <Badge variant="secondary" className="mb-2">
+          O'zbek tilidagi #1 AI Portal
+        </Badge>
+        <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl md:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+          Sun'iy Intellekt Dunyosini Kashf Eting
+        </h1>
+        <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
+          Eng so'nggi AI vositalari, yangiliklar va promptlar to'plami. Barchasi o'zbek tilida.
+        </p>
+        <div className="w-full max-w-sm space-y-2 pt-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input className="pl-8" placeholder="AI vositalarni qidirish..." type="search" />
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="container px-4 md:px-6 py-12 space-y-12 mx-auto">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <Bot className="h-10 w-10 mb-2 text-primary" />
+              <CardTitle>AI Katalog</CardTitle>
+              <CardDescription>
+                Yuzlab AI vositalari to'plami. Har bir vosita uchun batafsil qo'llanma va sharhlar.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="ghost" className="w-full justify-start pl-0">
+                Katalogni ko'rish &rarr;
+              </Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Newspaper className="h-10 w-10 mb-2 text-primary" />
+              <CardTitle>AI Yangiliklar</CardTitle>
+              <CardDescription>
+                Texnologiya olamidagi eng so'nggi yangiliklar va tahliliy maqolalar.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="ghost" className="w-full justify-start pl-0">
+                O'qishni boshlash &rarr;
+              </Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Terminal className="h-10 w-10 mb-2 text-primary" />
+              <CardTitle>Prompt Kutubxonasi</CardTitle>
+              <CardDescription>
+                ChatGPT, Midjourney va boshqa modellar uchun tayyor promptlar toplami.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="ghost" className="w-full justify-start pl-0">
+                Promptlarni izlash &rarr;
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section className="container px-4 md:px-6 py-12 md:py-24 lg:py-32 mx-auto">
+        <div className="flex flex-col items-center space-y-4 text-center">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
+              Telegram kanalimizga obuna bo'ling
+            </h2>
+            <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+              Eng qizg'in yangiliklar va eksklyuziv kontentlarni telegram kanalimizda kuzatib boring.
+            </p>
+          </div>
+          <Button size="lg" className="gap-2">
+            <Send className="h-4 w-4" /> Telegramga o'tish
+          </Button>
+        </div>
+      </section>
+
+      <footer className="py-6 w-full shrink-0 items-center px-4 md:px-6 border-t mt-auto">
+        <p className="text-xs text-center text-muted-foreground">
+          © 2026 Ailar. Barcha huquqlar himoyalangan.
+        </p>
       </footer>
-    </div>
+    </main>
   );
 }

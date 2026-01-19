@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+# Ailar
 
-## Getting Started
+O'zbek tilidagi AI Katalog, Yangiliklar va Promptlar kutubxonasi.
 
-First, run the development server:
+## Texnologiyalar
 
+- **Framework**: Next.js 15+ (App Router)
+- **UI**: Shadcn UI + Tailwind CSS
+- **Database**: Postgres (Neon) + Drizzle ORM
+- **Authentication**: Clerk
+- **Language**: TypeScript
+
+## O'rnatish
+
+1. Loyihani yuklab oling:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone ...
+cd ailar
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Kerakli paketlarni o'rnating:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. `.env.local` faylini yarating va kerakli kalitlarni yozing:
+```bash
+cp apps/web/.env.example apps/web/.env.local
+```
+`.env.local` fayliga quyidagilarni kiriting:
+- `DATABASE_URL`: Neon DB ulanish havolasi.
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Clerk Public Key.
+- `CLERK_SECRET_KEY`: Clerk Secret Key.
+- `TELEGRAM_BOT_TOKEN`: Telegram bot tokeni (BotFather dan oling).
+- `TELEGRAM_CHANNEL_ID`: Telegram kanal IDsi (masalan @kanalnomi).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+4. Ma'lumotlar bazasini yangilang:
+```bash
+npm run db:push -w apps/web
+```
+(Eslatma: `package.json` da `db:push` skripti bo'lmasa, `npx drizzle-kit push` ishlating)
 
-## Learn More
+5. Loyihani ishga tushiring:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Telegram Integratsiyasi
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`apps/web/lib/telegram.ts` faylida `publishToTelegram` funksiyasi mavjud. Bu funksiyadan foydalanib yangilik yoki postlarni telegram kanalga yuborishingiz mumkin.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Strukturasi
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `apps/web/app/catalog`: AI Katalog sahifasi
+- `apps/web/app/news`: Yangiliklar sahifasi
+- `apps/web/app/prompts`: Promptlar sahifasi
+- `apps/web/db`: Ma'lumotlar bazasi sxemalari
