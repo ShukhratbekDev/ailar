@@ -7,27 +7,6 @@ import { Search, Bot, Newspaper, Terminal, Send } from "lucide-react";
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center gap-4 px-4 md:px-6 mx-auto">
-          <div className="flex items-center gap-2 font-bold text-xl">
-            <div className="bg-primary text-primary-foreground p-1 rounded-lg">
-              <Bot className="h-6 w-6" />
-            </div>
-            <span>Ailar</span>
-          </div>
-          <nav className="flex-1 hidden md:flex items-center gap-6 text-sm font-medium">
-            <a href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Katalog</a>
-            <a href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Yangiliklar</a>
-            <a href="#" className="transition-colors hover:text-foreground/80 text-foreground/60">Promptlar</a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">Kirish</Button>
-            <Button size="sm">Ro'yxatdan o'tish</Button>
-          </div>
-        </div>
-      </header>
-
       {/* Hero */}
       <section className="flex-1 py-12 md:py-24 lg:py-32 flex flex-col items-center text-center space-y-4 px-4 md:px-6 bg-gradient-to-b from-background to-muted/50">
         <Badge variant="secondary" className="mb-2">
