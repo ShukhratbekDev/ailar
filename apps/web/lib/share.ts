@@ -167,7 +167,7 @@ function createPlatformMessage(
         twitter: 280, // X (Twitter)
     };
 
-    const limit = limits[platform];
+    const limit = (platform === 'telegram' && content.imageUrl) ? 1024 : limits[platform];
 
     // Build message
     let message = `${title}\n\n${description}`;
@@ -214,8 +214,15 @@ export async function postToTelegram(
     try {
         const message = createPlatformMessage(content, 'telegram');
 
+        // Escape HTML special characters but keep our tags
+        const escapedMessage = message
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
         // Format for Telegram HTML
-        const htmlMessage = message
+        const htmlMessage = escapedMessage
+            .replace(/&lt;b&gt;(.*?)&lt;\/b&gt;/g, '<b>$1</b>') // If we had tags already
             .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // Bold
             .replace(/\*(.*?)\*/g, '<i>$1</i>'); // Italic
 

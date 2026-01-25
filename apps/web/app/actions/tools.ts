@@ -157,8 +157,9 @@ export async function createTool(prevState: any, formData: FormData) {
         };
 
         const hasSharing = Object.values(platforms).some(v => v);
+        const shouldShare = hasSharing && status === 'published';
 
-        if (hasSharing && newTool) {
+        if (shouldShare && newTool) {
             try {
                 const shareable = createToolShareable({
                     name: newTool.name,
@@ -168,7 +169,12 @@ export async function createTool(prevState: any, formData: FormData) {
                     category: newTool.category,
                     tags: newTool.tags
                 });
-                await shareToSocialMedia(shareable, platforms);
+                const results = await shareToSocialMedia(shareable, platforms);
+
+                // Log any failures
+                if (results.telegram && !results.telegram.success) {
+                    console.error('Telegram posting failed for tool:', results.telegram.error);
+                }
             } catch (smError) {
                 console.error("Social sharing failed:", smError);
             }
