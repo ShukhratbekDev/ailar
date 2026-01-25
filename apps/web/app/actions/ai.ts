@@ -261,7 +261,7 @@ export async function generateToolContent(
                 "description": "Short catchy slogan/intro (one sentence, Uzbek)",
                 "content": "Full detailed review and guide (Markdown, Uzbek)",
                 "category": "Preferred: Chatbot, Gibrid (Multimodal), Video yaratish, Rasm yaratish, Unumdorlik, Matn yozish, Dasturlash, Marketing, Audio/Ovoz, SEO, Dizayn, Tadqiqot, Fan va Ta'lim, Biznes va Analitika. (If none fit, you can suggest a highly descriptive new category in Uzbek)",
-                "toolType": "One of: app, model, api, library",
+                "toolType": "Choose based on use case: 'app' (if it has a UI for users, like Claude.ai), 'model' (if it's just the raw AI engine like GPT-4), 'api' (for developers), 'library' (source code/SDK)",
                 "pricingType": "One of: free, freemium, paid",
                 "pricingText": "Strictly follow PRICING RULES in Uzbek",
                 "tags": "AI, Tool, Tech (comma separated)",
