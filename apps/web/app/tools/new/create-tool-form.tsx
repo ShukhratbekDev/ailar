@@ -126,7 +126,6 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 features: Array.isArray(result.features) ? result.features.join('\n') : prev.features,
                 pros: Array.isArray(result.pros) ? result.pros.join('\n') : prev.pros,
                 cons: Array.isArray(result.cons) ? result.cons.join('\n') : prev.cons,
-                imagePrompt: result.imagePrompt || prev.imagePrompt || result.name || '', // Use name as fallback if empty
                 url: aiContext.startsWith('http') ? aiContext : prev.url
             }));
 

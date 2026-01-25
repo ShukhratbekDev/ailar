@@ -128,7 +128,6 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 tags: result.tags || prev.tags,
                 readTime: result.readTime?.toString() || prev.readTime,
                 imageUrl: (prev.imageUrl && prev.imageUrl !== '') ? prev.imageUrl : (result.imageUrl || ''),
-                imagePrompt: result.imagePrompt || prev.imagePrompt,
                 sourceUrl: aiContext.startsWith('http') ? aiContext : prev.sourceUrl
             }));
 

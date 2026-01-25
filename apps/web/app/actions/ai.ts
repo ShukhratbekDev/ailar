@@ -100,10 +100,9 @@ export async function generateNewsContent(
             REQUIREMENTS:
             1. The news MUST be in Uzbek language (Latin script).
             2. The content MUST be in Markdown format and rich in structure (headers, lists, bold text).
-            3. Generate a high-quality image prompt in English suitable for the news.
-            4. IMPORTANT: Return the response in RAW JSON format. Do NOT wrap it in markdown code blocks like \`\`\`json.
-            5. CRITICAL: Ensure all double quotes (") inside specific field values (like title, content) are properly escaped with backslash (\\").
-            6. Do NOT include any comments or trailing commas in the JSON.
+            3. IMPORTANT: Return the response in RAW JSON format. Do NOT wrap it in markdown code blocks like \`\`\`json.
+            4. CRITICAL: Ensure all double quotes (") inside specific field values (like title, content) are properly escaped with backslash (\\").
+            5. Do NOT include any comments or trailing commas in the JSON.
             
             RESPONSE FORMAT (JSON ONLY):
             {
@@ -111,8 +110,7 @@ export async function generateNewsContent(
                 "description": "Short description for the home page (1-2 sentences, in Uzbek)",
                 "content": "Full news content (Markdown format, in Uzbek)",
                 "tags": "AI, Texnologiya, Yangiliklar (comma separated tags)",
-                "readTime": "Read time (number only)",
-                "imagePrompt": "High quality image prompt in English"
+                "readTime": "Read time (number only)"
             }
         `;
 
@@ -242,8 +240,7 @@ export async function generateToolContent(
                 "tags": "AI, Tool, Tech (comma separated)",
                 "features": ["feature 1", "feature 2", "feature 3"],
                 "pros": ["pro 1", "pro 2"],
-                "cons": ["con 1", "con 2"],
-                "imagePrompt": "Detailed English prompt for the tool cover image"
+                "cons": ["con 1", "con 2"]
             }
         `;
 
