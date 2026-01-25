@@ -1,38 +1,56 @@
-export async function publishToTelegram(content: string, imageUrl?: string) {
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    const channelId = process.env.TELEGRAM_CHANNEL_ID;
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID;
 
-    if (!token || !channelId) {
-        console.error("Telegram credentials not found");
-        return { success: false, error: "Credentials missing" };
+export async function sendTelegramMessage(text: string, photoUrl?: string, link?: string) {
+    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHANNEL_ID) {
+        console.warn("Telegram credentials missing");
+        throw new Error("Telegram credentials missing");
     }
 
     try {
-        const url = imageUrl
-            ? `https://api.telegram.org/bot${token}/sendPhoto`
-            : `https://api.telegram.org/bot${token}/sendMessage`;
+        let url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/`;
+        let body: any = {
+            chat_id: TELEGRAM_CHANNEL_ID,
+            parse_mode: 'HTML',
+        };
 
-        const body = imageUrl
-            ? { chat_id: channelId, photo: imageUrl, caption: content, parse_mode: 'HTML' }
-            : { chat_id: channelId, text: content, parse_mode: 'HTML' };
+        if (photoUrl) {
+            url += 'sendPhoto';
+            body.photo = photoUrl;
+            body.caption = text;
+        } else {
+            url += 'sendMessage';
+            body.text = text;
+        }
+
+        // Only add inline button if link is provided and is not localhost
+        // Telegram API doesn't accept localhost URLs
+        if (link && !link.includes('localhost')) {
+            body.reply_markup = {
+                inline_keyboard: [
+                    [{ text: "Batafsil o'qish", url: link }]
+                ]
+            };
+        }
 
         const response = await fetch(url, {
-            method: "POST",
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json",
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(body),
         });
 
-        if (!response.ok) {
-            const error = await response.json();
-            console.error("Telegram API Error:", error);
-            return { success: false, error };
+        const data = await response.json();
+        if (!data.ok) {
+            console.error("Telegram API Error:", data);
+            throw new Error(`Telegram API Error: ${data.description || 'Unknown error'}`);
         }
 
-        return { success: true, data: await response.json() };
+        console.log("Message sent to Telegram successfully");
     } catch (error) {
         console.error("Failed to send to Telegram:", error);
-        return { success: false, error };
+        throw error; // Re-throw to propagate the error
     }
 }
+
