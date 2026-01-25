@@ -107,13 +107,7 @@ export function ToolsGrid({ initialTools, search = "", category = "" }: ToolsGri
                                 )}
 
 
-                                {/* Logo Badge Overlay */}
-                                {tool.imageUrl && tool.logoUrl && (
-                                    <div className="absolute top-3 left-3 w-12 h-12 rounded-2xl bg-white/95 backdrop-blur shadow-xl border border-border/50 p-2 overflow-hidden ring-4 ring-black/5">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={tool.logoUrl} alt="" className="w-full h-full object-contain" />
-                                    </div>
-                                )}
+
                             </div>
 
                             {/* Content */}
