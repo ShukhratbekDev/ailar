@@ -14,6 +14,7 @@ import { eq, sql } from "drizzle-orm";
 import { isAdmin } from "@/lib/auth";
 
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
+const getModelVersion = (modelName: string) => (modelName.includes('2.0') || modelName.includes('3') || modelName.includes('preview')) ? 'v1beta' : 'v1';
 
 
 
@@ -78,10 +79,7 @@ export async function generateNewsContent(
     try {
         const model = genAI.getGenerativeModel({
             model: modelName,
-            generationConfig: {
-                responseMimeType: "application/json"
-            }
-        }, { apiVersion: modelName.includes('2.0') ? 'v1beta' : 'v1' });
+        }, { apiVersion: getModelVersion(modelName) });
 
         // Parse URL if provided
         if (prompt.trim().startsWith('http')) {
@@ -223,10 +221,7 @@ export async function generateToolContent(
     try {
         const model = genAI.getGenerativeModel({
             model: modelName,
-            generationConfig: {
-                responseMimeType: "application/json"
-            }
-        }, { apiVersion: modelName.includes('2.0') ? 'v1beta' : 'v1' });
+        }, { apiVersion: getModelVersion(modelName) });
 
         if (prompt.trim().startsWith('http')) {
             try {
@@ -389,7 +384,7 @@ export async function generateNewsImage(title: string, description: string, mode
             imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
         } else {
             // Direct Image Generation (Nano Banana / Imagen / etc.)
-            const imageModel = genAI.getGenerativeModel({ model: modelName }, { apiVersion: modelName.includes('2.0') ? 'v1beta' : 'v1' });
+            const imageModel = genAI.getGenerativeModel({ model: modelName }, { apiVersion: getModelVersion(modelName) });
             // @ts-ignore
             const result = await imageModel.generateContent(imagePromptText);
             const response = await result.response;
@@ -423,7 +418,7 @@ export async function generateNewsImage(title: string, description: string, mode
 
 export async function generateImagePrompt(title: string, description: string, currentPrompt?: string, modelName: string = "gemini-2.0-flash-exp") {
     try {
-        const promptRefiner = genAI.getGenerativeModel({ model: modelName }, { apiVersion: modelName.includes('2.0') ? 'v1beta' : 'v1' });
+        const promptRefiner = genAI.getGenerativeModel({ model: modelName }, { apiVersion: getModelVersion(modelName) });
 
         let refinementPrompt;
         if (currentPrompt) {
