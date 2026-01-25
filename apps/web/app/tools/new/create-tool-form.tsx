@@ -33,7 +33,7 @@ const initialState = {
 const BASE_CATEGORIES = [
     "Chatbot", "Video yaratish", "Rasm yaratish", "Unumdorlik",
     "Matn yozish", "Dasturlash", "Marketing", "Audio/Ovoz", "SEO", "Dizayn", "Tadqiqot",
-    "Fan va Ta'lim", "Biznes va Analitika"
+    "Multi", "Fan va Ta'lim", "Biznes va Analitika"
 ];
 
 const PRICING_TYPES = [
@@ -531,7 +531,6 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                                 <LinkIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                                             </div>
                                             <Input
-                                                name="url"
                                                 value={aiContext}
                                                 onChange={(e) => {
                                                     setAiContext(e.target.value);

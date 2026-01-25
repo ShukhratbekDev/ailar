@@ -434,7 +434,6 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                                 <LinkIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
                                             </div>
                                             <Input
-                                                name="sourceUrl"
                                                 value={aiContext}
                                                 onChange={(e) => {
                                                     setAiContext(e.target.value);
