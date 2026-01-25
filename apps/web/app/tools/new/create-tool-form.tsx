@@ -665,7 +665,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                     <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Veb-sayt URL</Label>
                                     <div className="relative">
                                         <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                        <Input name="url" value={formData.url} onChange={handleInputChange} className="pl-10 h-11 bg-background/50" placeholder="https://..." disabled />
+                                        <Input name="url" value={formData.url} onChange={handleInputChange} className="pl-10 h-11 bg-background/50" placeholder="https://..." />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
