@@ -30,9 +30,10 @@ const initialState = {
 };
 
 
-const CATEGORIES = [
-    "Chatbot", "Video yaratish", "Rasm yaratish", "Unumdorlik",
-    "Matn yozish", "Dasturlash", "Marketing", "Audio/Ovoz", "SEO", "Dizayn", "Tadqiqot"
+const BASE_CATEGORIES = [
+    "Chatbot", "Gibrid (Multimodal)", "Video yaratish", "Rasm yaratish", "Unumdorlik",
+    "Matn yozish", "Dasturlash", "Marketing", "Audio/Ovoz", "SEO", "Dizayn", "Tadqiqot",
+    "Fan va Ta'lim", "Biznes va Analitika"
 ];
 
 const PRICING_TYPES = [
@@ -52,6 +53,8 @@ const TOOL_TYPES = [
 export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
     // @ts-ignore
     const [state, formAction, isPending] = useActionState(createTool, initialState);
+
+    const [categories, setCategories] = useState(BASE_CATEGORIES);
 
     // AI State
     const [aiContext, setAiContext] = useState('');
@@ -112,6 +115,11 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
         setIsGenerating(true);
         try {
             const result = await generateToolContent(aiContext, selectedContentModel);
+
+            // Handle Dynamic Categories
+            if (result.category && !categories.includes(result.category)) {
+                setCategories(prev => [...prev, result.category]);
+            }
 
             setFormData(prev => ({
                 ...prev,
@@ -678,7 +686,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                         value={formData.category}
                                         onChange={handleInputChange}
                                     >
-                                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">

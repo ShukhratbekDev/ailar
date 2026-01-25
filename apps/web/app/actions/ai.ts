@@ -260,7 +260,7 @@ export async function generateToolContent(
                 "name": "Tool Name",
                 "description": "Short catchy slogan/intro (one sentence, Uzbek)",
                 "content": "Full detailed review and guide (Markdown, Uzbek)",
-                "category": "One of: Chatbot, Video yaratish, Rasm yaratish, Unumdorlik, Matn yozish, Dasturlash, Marketing, Audio/Ovoz, SEO, Dizayn, Tadqiqot",
+                "category": "Preferred: Chatbot, Gibrid (Multimodal), Video yaratish, Rasm yaratish, Unumdorlik, Matn yozish, Dasturlash, Marketing, Audio/Ovoz, SEO, Dizayn, Tadqiqot, Fan va Ta'lim, Biznes va Analitika. (If none fit, you can suggest a highly descriptive new category in Uzbek)",
                 "toolType": "One of: app, model, api, library",
                 "pricingType": "One of: free, freemium, paid",
                 "pricingText": "Strictly follow PRICING RULES in Uzbek",
