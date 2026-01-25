@@ -52,8 +52,7 @@ async function scrapeUrl(url: string): Promise<string> {
 
 export async function generateNewsContent(
     prompt: string,
-    modelName: string = "gemini-2.0-flash-exp",
-    imageModelName: string = "gemini-1.5-flash"
+    modelName: string = "gemini-2.0-flash-exp"
 ) {
     const { userId } = await auth();
 
@@ -171,21 +170,7 @@ export async function generateNewsContent(
             data.readTime = Math.max(1, readTime).toString();
         }
 
-        // Generate image automatically if possible
-        let imageUrl = '';
-        try {
-            const imageResult = await generateNewsImage(
-                data.title,
-                data.description,
-                imageModelName,
-                data.imagePrompt
-            );
-            imageUrl = imageResult.imageUrl;
-        } catch (imageError) {
-            console.error("Auto-image generation failed:", imageError);
-        }
-
-        return { ...data, imageUrl };
+        return { ...data };
     } catch (error: any) {
         console.error("AI Generation Error:", error);
         const message = error.message || "Yangilikni generatsiya qilishda xatolik yuz berdi.";
@@ -195,8 +180,7 @@ export async function generateNewsContent(
 
 export async function generateToolContent(
     prompt: string,
-    modelName: string = "gemini-2.0-flash-exp",
-    imageModelName: string = "gemini-1.5-flash"
+    modelName: string = "gemini-2.0-flash-exp"
 ) {
     const { userId } = await auth();
 
@@ -305,23 +289,7 @@ export async function generateToolContent(
         }
 
 
-        // Generate image automatically if possible
-        let imageUrl = '';
-        try {
-            // For tools, we use the tool name as title and description as is
-            // We use generateNewsImage as the general purpose image generator
-            const imageResult = await generateNewsImage(
-                data.name,
-                data.description,
-                imageModelName,
-                data.imagePrompt || data.name
-            );
-            imageUrl = imageResult.imageUrl;
-        } catch (imageError) {
-            console.error("Auto-tool-image generation failed:", imageError);
-        }
-
-        return { ...data, imageUrl };
+        return { ...data };
     } catch (error: any) {
         console.error("AI Tool Generation Error:", error);
         throw new Error(error.message || "Vosita ma'lumotlarini yaratishda xatolik yuz berdi.");

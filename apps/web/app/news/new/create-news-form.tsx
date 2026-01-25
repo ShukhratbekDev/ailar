@@ -119,7 +119,7 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
         }
 
         try {
-            const result = await generateNewsContent(aiContext, selectedContentModel, selectedImageModel);
+            const result = await generateNewsContent(aiContext, selectedContentModel);
             setFormData(prev => ({
                 ...prev,
                 title: result.title || prev.title,

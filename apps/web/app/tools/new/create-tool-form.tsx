@@ -111,7 +111,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
 
         setIsGenerating(true);
         try {
-            const result = await generateToolContent(aiContext, selectedContentModel, selectedImageModel);
+            const result = await generateToolContent(aiContext, selectedContentModel);
 
             setFormData(prev => ({
                 ...prev,
