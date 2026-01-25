@@ -225,8 +225,12 @@ export async function generateToolContent(
             1. Language: Uzbek (Latin script).
             2. High-quality Markdown for long content.
             3. Detailed features, pros, and cons.
-            4. Return RAW JSON format.
-            5. Escape double quotes (") with (\\").
+            4. PRICING RULES:
+               - If pricingType is 'free', pricingText must be 'Mutlaqo bepul'.
+               - If pricingType is 'freemium', pricingText should describe the starting price (e.g., '$10/oydan boshlanadi') or mention paid features (e.g., 'Premium rejalar bor'). DO NOT start with 'Bepul'.
+               - If pricingType is 'paid', pricingText must show the specific cost.
+            5. Return RAW JSON format.
+            6. Escape double quotes (") with (\\").
             
             RESPONSE FORMAT:
             {
@@ -236,7 +240,7 @@ export async function generateToolContent(
                 "category": "One of: Chatbot, Video yaratish, Rasm yaratish, Unumdorlik, Matn yozish, Dasturlash, Marketing, Audio/Ovoz, SEO, Dizayn, Tadqiqot",
                 "toolType": "One of: app, model, api, library",
                 "pricingType": "One of: free, freemium, paid",
-                "pricingText": "e.g., $10/mo or Free Trial",
+                "pricingText": "Strictly follow PRICING RULES in Uzbek",
                 "tags": "AI, Tool, Tech (comma separated)",
                 "features": ["feature 1", "feature 2", "feature 3"],
                 "pros": ["pro 1", "pro 2"],
