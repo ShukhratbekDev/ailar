@@ -31,7 +31,7 @@ const initialState = {
 
 
 const BASE_CATEGORIES = [
-    "Chatbot", "Gibrid (Multimodal)", "Video yaratish", "Rasm yaratish", "Unumdorlik",
+    "Chatbot", "Video yaratish", "Rasm yaratish", "Unumdorlik",
     "Matn yozish", "Dasturlash", "Marketing", "Audio/Ovoz", "SEO", "Dizayn", "Tadqiqot",
     "Fan va Ta'lim", "Biznes va Analitika"
 ];
