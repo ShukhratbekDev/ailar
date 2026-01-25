@@ -173,7 +173,21 @@ export async function generateNewsContent(
             data.readTime = Math.max(1, readTime).toString();
         }
 
-        return { ...data };
+        // Generate image automatically if possible
+        let imageUrl = '';
+        try {
+            const imageResult = await generateNewsImage(
+                data.title,
+                data.description,
+                imageModelName,
+                data.imagePrompt
+            );
+            imageUrl = imageResult.imageUrl;
+        } catch (imageError) {
+            console.error("Auto-image generation failed:", imageError);
+        }
+
+        return { ...data, imageUrl };
     } catch (error: any) {
         console.error("AI Generation Error:", error);
         const message = error.message || "Yangilikni generatsiya qilishda xatolik yuz berdi.";
@@ -249,7 +263,8 @@ export async function generateToolContent(
                 "tags": "AI, Tool, Tech (comma separated)",
                 "features": ["feature 1", "feature 2", "feature 3"],
                 "pros": ["pro 1", "pro 2"],
-                "cons": ["con 1", "con 2"]
+                "cons": ["con 1", "con 2"],
+                "imagePrompt": "Detailed English prompt for the tool cover image"
             }
         `;
 
@@ -295,7 +310,23 @@ export async function generateToolContent(
         }
 
 
-        return { ...data };
+        // Generate image automatically if possible
+        let imageUrl = '';
+        try {
+            // For tools, we use the tool name as title and description as is
+            // We use generateNewsImage as the general purpose image generator
+            const imageResult = await generateNewsImage(
+                data.name,
+                data.description,
+                imageModelName,
+                data.imagePrompt || data.name
+            );
+            imageUrl = imageResult.imageUrl;
+        } catch (imageError) {
+            console.error("Auto-tool-image generation failed:", imageError);
+        }
+
+        return { ...data, imageUrl };
     } catch (error: any) {
         console.error("AI Tool Generation Error:", error);
         throw new Error(error.message || "Vosita ma'lumotlarini yaratishda xatolik yuz berdi.");
@@ -390,9 +421,9 @@ export async function generateNewsImage(title: string, description: string, mode
     }
 }
 
-export async function generateImagePrompt(title: string, description: string, currentPrompt?: string) {
+export async function generateImagePrompt(title: string, description: string, currentPrompt?: string, modelName: string = "gemini-2.0-flash-exp") {
     try {
-        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+        const promptRefiner = genAI.getGenerativeModel({ model: modelName }, { apiVersion: modelName.includes('2.0') ? 'v1beta' : 'v1' });
 
         let refinementPrompt;
         if (currentPrompt) {

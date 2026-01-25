@@ -111,7 +111,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
 
         setIsGenerating(true);
         try {
-            const result = await generateToolContent(aiContext, selectedContentModel);
+            const result = await generateToolContent(aiContext, selectedContentModel, selectedImageModel);
 
             setFormData(prev => ({
                 ...prev,
@@ -126,7 +126,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 features: Array.isArray(result.features) ? result.features.join('\n') : prev.features,
                 pros: Array.isArray(result.pros) ? result.pros.join('\n') : prev.pros,
                 cons: Array.isArray(result.cons) ? result.cons.join('\n') : prev.cons,
-                imagePrompt: prev.imagePrompt || result.name || '', // Use name as fallback if empty
+                imagePrompt: result.imagePrompt || prev.imagePrompt || result.name || '', // Use name as fallback if empty
                 url: aiContext.startsWith('http') ? aiContext : prev.url
             }));
 
@@ -151,7 +151,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
         setIsGeneratingImage(true);
         try {
             const { generateImagePrompt } = await import('@/app/actions/ai');
-            const result = await generateImagePrompt(formData.name, formData.description, formData.imagePrompt);
+            const result = await generateImagePrompt(formData.name, formData.description, formData.imagePrompt, selectedContentModel);
             setFormData(p => ({ ...p, imagePrompt: result.prompt }));
             toast.success("Prompt yaratildi!");
         } catch (error: any) {

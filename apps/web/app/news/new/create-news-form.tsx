@@ -128,7 +128,7 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 tags: result.tags || prev.tags,
                 readTime: result.readTime?.toString() || prev.readTime,
                 imageUrl: (prev.imageUrl && prev.imageUrl !== '') ? prev.imageUrl : (result.imageUrl || ''),
-                // Don't auto-set image prompt as per request  
+                imagePrompt: result.imagePrompt || prev.imagePrompt,
                 sourceUrl: aiContext.startsWith('http') ? aiContext : prev.sourceUrl
             }));
 
@@ -150,7 +150,7 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
         setIsGeneratingImage(true);
         try {
             const { generateImagePrompt } = await import('@/app/actions/ai');
-            const result = await generateImagePrompt(formData.title, formData.description, formData.imagePrompt);
+            const result = await generateImagePrompt(formData.title, formData.description, formData.imagePrompt, selectedContentModel);
             setFormData(p => ({ ...p, imagePrompt: result.prompt }));
             toast.success("Prompt yaratildi!");
         } catch (error: any) {
