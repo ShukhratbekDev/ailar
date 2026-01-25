@@ -51,7 +51,7 @@ async function scrapeUrl(url: string): Promise<string> {
 
 export async function generateNewsContent(
     prompt: string,
-    modelName: string = "gemini-2.0-flash",
+    modelName: string = "gemini-2.0-flash-exp",
     imageModelName: string = "gemini-1.5-flash"
 ) {
     const { userId } = await auth();
@@ -81,7 +81,7 @@ export async function generateNewsContent(
             generationConfig: {
                 responseMimeType: "application/json"
             }
-        });
+        }, { apiVersion: modelName.includes('2.0') ? 'v1beta' : 'v1' });
 
         // Parse URL if provided
         if (prompt.trim().startsWith('http')) {
@@ -183,7 +183,7 @@ export async function generateNewsContent(
 
 export async function generateToolContent(
     prompt: string,
-    modelName: string = "gemini-2.0-flash",
+    modelName: string = "gemini-2.0-flash-exp",
     imageModelName: string = "gemini-1.5-flash"
 ) {
     const { userId } = await auth();
@@ -212,7 +212,7 @@ export async function generateToolContent(
             generationConfig: {
                 responseMimeType: "application/json"
             }
-        });
+        }, { apiVersion: modelName.includes('2.0') ? 'v1beta' : 'v1' });
 
         if (prompt.trim().startsWith('http')) {
             try {
@@ -325,7 +325,7 @@ export async function generateNewsImage(title: string, description: string, mode
 
         // Step 1: Generate a high-quality visual description (Prompt) using a text model
         // Refine the prompt (either from custom input or from title/description)
-        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
 
         let refinementPrompt;
         if (imagePromptText) {
@@ -358,7 +358,7 @@ export async function generateNewsImage(title: string, description: string, mode
             imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
         } else {
             // Direct Image Generation (Nano Banana / Imagen / etc.)
-            const imageModel = genAI.getGenerativeModel({ model: modelName });
+            const imageModel = genAI.getGenerativeModel({ model: modelName }, { apiVersion: modelName.includes('2.0') ? 'v1beta' : 'v1' });
             // @ts-ignore
             const result = await imageModel.generateContent(imagePromptText);
             const response = await result.response;
@@ -392,7 +392,7 @@ export async function generateNewsImage(title: string, description: string, mode
 
 export async function generateImagePrompt(title: string, description: string, currentPrompt?: string) {
     try {
-        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
 
         let refinementPrompt;
         if (currentPrompt) {
