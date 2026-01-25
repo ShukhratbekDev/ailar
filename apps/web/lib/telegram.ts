@@ -1,25 +1,29 @@
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID;
-
 export async function sendTelegramMessage(text: string, photoUrl?: string, link?: string) {
-    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHANNEL_ID) {
-        console.warn("Telegram credentials missing");
+    const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
+    const chat_id = process.env.TELEGRAM_CHANNEL_ID?.trim();
+
+    if (!token || !chat_id) {
+        console.warn("Telegram credentials missing (TOKEN or CHANNEL_ID)");
         throw new Error("Telegram credentials missing");
     }
 
+    // Safe diagnostics
+    console.log(`Telegram Attempt: Token Length=${token.length}, ChatID=${chat_id.substring(0, 4)}...`);
+
     try {
-        let url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/`;
+        const baseUrl = `https://api.telegram.org/bot${token}`;
+        let method = photoUrl ? 'sendPhoto' : 'sendMessage';
+        const url = `${baseUrl}/${method}`;
+
         let body: any = {
-            chat_id: TELEGRAM_CHANNEL_ID,
+            chat_id: chat_id,
             parse_mode: 'HTML',
         };
 
         if (photoUrl) {
-            url += 'sendPhoto';
             body.photo = photoUrl;
             body.caption = text;
         } else {
-            url += 'sendMessage';
             body.text = text;
         }
 
