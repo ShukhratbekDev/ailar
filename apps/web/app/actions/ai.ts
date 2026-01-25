@@ -325,7 +325,7 @@ export async function generateNewsImage(title: string, description: string, mode
 
         // Step 1: Generate a high-quality visual description (Prompt) using a text model
         // Refine the prompt (either from custom input or from title/description)
-        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
+        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
         let refinementPrompt;
         if (imagePromptText) {
@@ -392,7 +392,7 @@ export async function generateNewsImage(title: string, description: string, mode
 
 export async function generateImagePrompt(title: string, description: string, currentPrompt?: string) {
     try {
-        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }, { apiVersion: 'v1' });
+        const promptRefiner = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
         let refinementPrompt;
         if (currentPrompt) {
