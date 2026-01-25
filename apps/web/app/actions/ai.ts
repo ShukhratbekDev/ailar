@@ -30,6 +30,21 @@ async function scrapeUrl(url: string): Promise<string> {
 
         const $ = cheerio.load(response.data);
 
+        // Detect Bot Protection
+        const isBotProtected = $('title').text().includes('human') ||
+            $('body').text().includes('Verify you are human') ||
+            $('body').text().includes('Cloudflare');
+
+        if (isBotProtected) {
+            try {
+                const microlinkRes = await axios.get(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+                const meta = microlinkRes.data.data;
+                return `Title: ${meta.title}\nDescription: ${meta.description}\n\n${meta.text || ''}`;
+            } catch (e) {
+                console.warn("Fallback scrape also failed, returning raw error screen snippet.");
+            }
+        }
+
         // Remove script, style, and other non-content elements
         $('script, style, nav, footer, iframe, header, noscript').remove();
 

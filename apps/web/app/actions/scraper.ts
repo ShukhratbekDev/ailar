@@ -13,6 +13,21 @@ export async function extractMediaFromUrl(url: string) {
         });
 
         const $ = cheerio.load(response.data);
+        const isBotProtected = $('title').text().includes('human') ||
+            $('body').text().includes('Verify you are human') ||
+            $('body').text().includes('Cloudflare');
+
+        if (isBotProtected) {
+            console.log("Bot protection detected, using Microlink fallback...");
+            const microlinkRes = await axios.get(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+            const meta = microlinkRes.data.data;
+            return {
+                images: [meta.image?.url, meta.logo?.url].filter(Boolean) as string[],
+                title: meta.title || '',
+                description: meta.description || '',
+            };
+        }
+
         const images: string[] = [];
 
         // 1. OG Image (High priority)
@@ -73,6 +88,22 @@ export async function extractToolMediaFromUrl(url: string) {
         }
 
         const $ = cheerio.load(response.data);
+        const isBotProtected = $('title').text().includes('human') ||
+            $('body').text().includes('Verify you are human') ||
+            $('body').text().includes('Cloudflare');
+
+        if (isBotProtected) {
+            console.log("Bot protection detected for tool, using Microlink fallback...");
+            const microlinkRes = await axios.get(`https://api.microlink.io?url=${encodeURIComponent(url)}`);
+            const meta = microlinkRes.data.data;
+            const fallbackImgs = [meta.image?.url, meta.logo?.url, `https://image.thum.io/get/width/1200/crop/800/${url}`].filter(Boolean) as string[];
+            return {
+                images: fallbackImgs,
+                title: meta.title || '',
+                isFallback: true
+            };
+        }
+
         const images: string[] = [];
 
         const resolveUrl = (src: string | undefined) => {
