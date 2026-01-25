@@ -126,11 +126,13 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 features: Array.isArray(result.features) ? result.features.join('\n') : prev.features,
                 pros: Array.isArray(result.pros) ? result.pros.join('\n') : prev.pros,
                 cons: Array.isArray(result.cons) ? result.cons.join('\n') : prev.cons,
-                url: aiContext.startsWith('http') ? aiContext : prev.url
+                url: aiContext.trim().split(/\s+/)[0]?.startsWith('http') ? aiContext.trim().split(/\s+/)[0] || prev.url : prev.url
             }));
 
-            if (aiContext.startsWith('http')) {
-                handleExtractMedia(aiContext);
+            const cleanUrl = aiContext.trim().split(/\s+/)[0]?.startsWith('http') ? aiContext.trim().split(/\s+/)[0] : null;
+
+            if (cleanUrl) {
+                handleExtractMedia(cleanUrl);
             }
 
             toast.success('AI ma\'lumotlarni yaratdi!');

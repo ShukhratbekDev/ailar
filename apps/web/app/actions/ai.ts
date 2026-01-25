@@ -16,6 +16,12 @@ import { isAdmin } from "@/lib/auth";
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
 const getModelVersion = (modelName: string) => (modelName.includes('2.0') || modelName.includes('3') || modelName.includes('preview')) ? 'v1beta' : 'v1';
 
+const extractUrl = (text: string) => {
+    const parts = text.trim().split(/\s+/);
+    if (parts[0] && parts[0].startsWith('http')) return parts[0];
+    return null;
+};
+
 
 
 
@@ -96,15 +102,16 @@ export async function generateNewsContent(
         }, { apiVersion: getModelVersion(modelName) });
 
         // Parse URL if provided
-        if (prompt.trim().startsWith('http')) {
+        const potentialUrl = extractUrl(prompt);
+        if (potentialUrl) {
             try {
-                const scrapedContent = await scrapeUrl(prompt.trim());
+                const scrapedContent = await scrapeUrl(potentialUrl);
                 if (scrapedContent) {
                     // Update prompt to include the scraped content
-                    prompt = `Analysis of URL (${prompt}):\n\n${scrapedContent}`;
+                    prompt = `Analysis of URL (${potentialUrl}):\n\n${scrapedContent}\n\nAdditional Context: ${prompt}`;
                 }
             } catch (ignore) {
-                console.error("Failed to auto-scrape, using raw URL");
+                console.error("Failed to auto-scrape, using raw input");
             }
         }
 
@@ -220,11 +227,12 @@ export async function generateToolContent(
             model: modelName,
         }, { apiVersion: getModelVersion(modelName) });
 
-        if (prompt.trim().startsWith('http')) {
+        const potentialUrl = extractUrl(prompt);
+        if (potentialUrl) {
             try {
-                const scrapedContent = await scrapeUrl(prompt.trim());
+                const scrapedContent = await scrapeUrl(potentialUrl);
                 if (scrapedContent) {
-                    prompt = `Analysis of AI Tool Website (${prompt}):\n\n${scrapedContent}`;
+                    prompt = `Analysis of AI Tool Website (${potentialUrl}):\n\n${scrapedContent}\n\nAdditional Context: ${prompt}`;
                 }
             } catch (ignore) {
                 // Already handled in scrapeUrl

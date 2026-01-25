@@ -128,7 +128,7 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 tags: result.tags || prev.tags,
                 readTime: result.readTime?.toString() || prev.readTime,
                 imageUrl: (prev.imageUrl && prev.imageUrl !== '') ? prev.imageUrl : (result.imageUrl || ''),
-                sourceUrl: aiContext.startsWith('http') ? aiContext : prev.sourceUrl
+                sourceUrl: aiContext.trim().split(/\s+/)[0]?.startsWith('http') ? aiContext.trim().split(/\s+/)[0] || prev.sourceUrl : prev.sourceUrl
             }));
 
             toast.success(`Maqola yaratildi!`);
