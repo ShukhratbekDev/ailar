@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import { ToolViewTracker, ScrollProgress, ToolFloatingActionBar, SocialShare, ToolLikeButton, ToolActions } from "./client-components";
-import { isEditor } from "@/lib/auth";
+import { isEditor, isAdmin } from "@/lib/auth";
+import { ToolViewTracker, ScrollProgress, ToolFloatingActionBar, SocialShare, ToolLikeButton, ToolActions, ToolAdminActions } from "./client-components";
 import { db } from "@/db";
 import { tools, toolLikes } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
@@ -44,6 +44,7 @@ export default async function ToolDetailPage({
     }
 
     const { userId } = await auth();
+    const admin = await isAdmin();
     let hasLiked = false;
 
     if (userId) {
@@ -199,6 +200,12 @@ export default async function ToolDetailPage({
                                 <h4 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Ulashish</h4>
                                 <SocialShare url={fullUrl} title={tool.name} className="justify-start gap-1" />
                             </div>
+
+                            {admin && (
+                                <div className="space-y-4 pt-8 border-t border-border/50">
+                                    <ToolAdminActions toolId={tool.id} />
+                                </div>
+                            )}
 
                             {tool.tags && tool.tags.length > 0 && (
                                 <div className="space-y-4 pt-8 border-t border-border/50">

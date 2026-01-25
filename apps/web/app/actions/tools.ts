@@ -199,6 +199,10 @@ export async function shareToolToSocialMedia(
         twitter?: boolean;
     }
 ) {
+    const { isAdmin } = await import('@/lib/auth');
+    if (!await isAdmin()) {
+        throw new Error("Sizda ijtimoiy tarmoqlarga ulashish uchun ruxsat yo'q.");
+    }
     try {
         const tool = await db.query.tools.findFirst({
             where: eq(tools.id, toolId),

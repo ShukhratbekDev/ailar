@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Share2, Send, Loader2, CheckCircle, Heart, Globe, ThumbsUp } from "lucide-react";
+import { Share2, Send, Loader2, CheckCircle, Heart, Globe, ThumbsUp, Sparkles } from "lucide-react";
 import { SocialShare as UnifiedSocialShare } from "@/components/social-share";
 import {
     Popover,
@@ -176,6 +176,40 @@ export function ToolFloatingActionBar({
                 <div className="w-px h-4 bg-border/50 mx-1" />
                 <SocialShare url={url} title={title} />
             </div>
+        </div>
+    );
+}
+export function ToolAdminActions({ toolId }: { toolId: number }) {
+    const [loading, setLoading] = useState(false);
+
+    const handleShare = async () => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            const result = await shareToolToSocialMedia(toolId, { telegram: true });
+            toast.success("Telegramga yuborildi!");
+        } catch (error: any) {
+            toast.error("Xatolik: " + error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                <Sparkles className="w-3 h-3" /> Admin Paneli
+            </h4>
+            <Button
+                onClick={handleShare}
+                disabled={loading}
+                variant="outline"
+                size="sm"
+                className="w-full justify-start gap-2 rounded-xl border-primary/20 hover:bg-primary/10 hover:text-primary transition-all"
+            >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                <span>Telegramga yuborish</span>
+            </Button>
         </div>
     );
 }
