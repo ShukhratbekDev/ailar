@@ -80,7 +80,14 @@ export async function extractToolMediaFromUrl(url: string) {
             try { return new URL(src, url).href; } catch { return null; }
         };
 
-        // Logo Heuristics
+        // 1. OG & Twitter (High priority for Covers)
+        const ogImage = resolveUrl($('meta[property="og:image"]').attr('content'));
+        if (ogImage && !images.includes(ogImage)) images.push(ogImage);
+
+        const twitterImage = resolveUrl($('meta[name="twitter:image"]').attr('content'));
+        if (twitterImage && !images.includes(twitterImage)) images.push(twitterImage);
+
+        // 2. Logo Heuristics
         const logoCandidates = [
             $('header img[src*="logo" i]').attr('src'),
             $('img[class*="logo" i]').attr('src'),
@@ -94,13 +101,6 @@ export async function extractToolMediaFromUrl(url: string) {
             const absoluteSrc = resolveUrl(src);
             if (absoluteSrc && !images.includes(absoluteSrc)) images.push(absoluteSrc);
         });
-
-        // OG & Twitter
-        const ogImage = resolveUrl($('meta[property="og:image"]').attr('content'));
-        if (ogImage && !images.includes(ogImage)) images.push(ogImage);
-
-        const twitterImage = resolveUrl($('meta[name="twitter:image"]').attr('content'));
-        if (twitterImage && !images.includes(twitterImage)) images.push(twitterImage);
 
         // All other images
         $('img').each((_, el) => {
