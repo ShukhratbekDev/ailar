@@ -12,11 +12,15 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@cl
 import { cn } from "@/lib/utils";
 import { NotificationsPopover } from "@/components/notifications-popover";
 
+const isProd = process.env.NODE_ENV === 'production';
+
 const navigation = [
     { name: "Yangiliklar", href: "/news", icon: Newspaper, description: "AI dunyosidagi eng so'nggi xabarlar" },
     { name: "Vositalar", href: "/tools", icon: Bot, description: "Eng foydali AI instrumentlar katalogi" },
-    { name: "Ta'lim", href: "/learn", icon: GraduationCap, description: "AI bo'yicha amaliy kurslar va darslar" },
-    { name: "Lug'at", href: "/learn/glossary", icon: Book, description: "AI atamalari izohli lug'ati" },
+    ...(isProd ? [] : [
+        { name: "Ta'lim", href: "/learn", icon: GraduationCap, description: "AI bo'yicha amaliy kurslar va darslar" },
+        { name: "Lug'at", href: "/learn/glossary", icon: Book, description: "AI atamalari izohli lug'ati" },
+    ]),
     { name: "Promptlar", href: "/prompts", icon: Terminal, description: "Professional tayyor buyruqlar" },
 ];
 
