@@ -7,7 +7,7 @@ import { HomeSearch } from "@/components/home-search";
 import { AilarLogo } from "@/components/logo";
 import { db } from "@/db";
 import { news } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { format } from "date-fns";
 import { uz } from "date-fns/locale";
 
@@ -15,33 +15,29 @@ export const dynamic = 'force-dynamic';
 
 export default async function Home() {
     // Fetch latest news
-    const latestNews = await db.query.news.findMany({
-        orderBy: [desc(news.publishedAt)],
-        where: (news, { eq }) => eq(news.status, 'published'),
-        limit: 3,
-        with: {
-            author: true
-        }
-    });
+    const latestNews = await db.select().from(news)
+        .where(eq(news.status, 'published'))
+        .orderBy(desc(news.publishedAt))
+        .limit(3);
 
     return (
         <main className="flex min-h-screen flex-col overflow-hidden relative">
             {/* Animated Ambient Background */}
-            <div className="fixed inset-0 -z-10 h-full w-full bg-background">
+            <div className="fixed inset-0 -z-10 h-full w-full bg-background overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:40px_40px]" />
 
-                {/* Animated gradient blobs */}
-                <div className="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-3xl xl:-top-6 animate-pulse-glow" aria-hidden="true">
-                    <div className="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-primary via-purple-500 to-blue-600 opacity-[0.15] animate-gradient-shift" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }} />
+                {/* Animated gradient blobs - Optimized for performance */}
+                <div className="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-[80px] md:blur-[120px] xl:-top-6 animate-pulse-glow will-change-opacity" aria-hidden="true">
+                    <div className="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-primary/20 via-purple-500/10 to-blue-600/20 animate-gradient-shift will-change-transform" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }} />
                 </div>
 
-                {/* Floating orbs */}
-                <div className="absolute right-1/4 top-1/4 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl animate-float" />
-                <div className="absolute left-1/4 bottom-1/4 h-80 w-80 rounded-full bg-purple-500/10 blur-3xl animate-float-slow" />
+                {/* Floating orbs - Simplified for performance */}
+                <div className="absolute right-1/4 top-1/4 h-64 w-64 md:h-96 md:w-96 rounded-full bg-blue-500/5 blur-3xl animate-float will-change-transform" />
+                <div className="absolute left-1/4 bottom-1/4 h-48 w-48 md:h-80 md:w-80 rounded-full bg-purple-500/5 blur-3xl animate-float-slow will-change-transform" />
             </div>
 
             {/* Hero Section */}
-            <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 container px-4 md:px-6 mx-auto">
+            <section className="relative pt-24 pb-20 md:pt-36 md:pb-32 container px-4 md:px-6 mx-auto">
                 <div className="flex flex-col items-center text-center space-y-10 max-w-5xl mx-auto animate-fade-in-up">
                     {/* Badge */}
                     <div className="inline-flex items-center gap-2 rounded-full border border-border/40 bg-muted/30 px-4 py-1.5 text-sm font-medium backdrop-blur-sm hover:bg-muted/50 transition-colors">
@@ -51,13 +47,13 @@ export default async function Home() {
 
                     {/* Main Heading */}
                     <div className="space-y-6">
-                        <h1 className="font-heading text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1] text-balance">
+                        <h1 className="font-heading text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1] text-balance px-2">
                             AI Dunyosi{" "}
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-600 to-purple-600 animate-gradient-shift">
                                 O'zbek Tilida
                             </span>
                         </h1>
-                        <p className="mx-auto max-w-2xl text-lg md:text-xl text-muted-foreground leading-relaxed">
+                        <p className="mx-auto max-w-2xl text-base md:text-xl text-muted-foreground leading-relaxed px-4">
                             Eng yaxshi AI vositalar, so'nggi yangiliklar va professional promptlar — barchasi bir platformada.
                         </p>
                     </div>
@@ -105,13 +101,13 @@ export default async function Home() {
                             </div>
 
                             <div className="relative z-10 space-y-4">
-                                <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                                <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400">
                                     <Bot className="h-3.5 w-3.5" />
                                     Vositalar
                                 </div>
                                 <div className="space-y-3">
-                                    <h3 className="text-4xl md:text-5xl font-bold tracking-tight">AI Vositalar</h3>
-                                    <p className="text-muted-foreground text-lg max-w-md">
+                                    <h3 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">AI Vositalar</h3>
+                                    <p className="text-muted-foreground text-sm sm:text-lg max-w-md">
                                         Ishingizni osonlashtiruvchi 500+ sun'iy intellekt vositalarini kashf eting.
                                     </p>
                                 </div>
@@ -132,13 +128,13 @@ export default async function Home() {
                             </div>
 
                             <div className="relative z-10 space-y-4">
-                                <div className="inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-3 py-1 text-xs font-medium text-purple-600 dark:text-purple-400">
+                                <div className="inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-3 py-1 text-xs font-semibold text-purple-600 dark:text-purple-400">
                                     <Terminal className="h-3.5 w-3.5" />
                                     Promptlar
                                 </div>
                                 <div className="space-y-3">
-                                    <h3 className="text-3xl md:text-4xl font-bold tracking-tight">Promptlar</h3>
-                                    <p className="text-muted-foreground">
+                                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">Promptlar</h3>
+                                    <p className="text-muted-foreground text-sm sm:text-base">
                                         Professional darajadagi tayyor buyruqlar to'plami.
                                     </p>
                                 </div>
@@ -159,13 +155,13 @@ export default async function Home() {
                             </div>
 
                             <div className="relative z-10 space-y-4 text-center md:text-left">
-                                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                     <Newspaper className="h-3.5 w-3.5" />
                                     Yangiliklar
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-3xl md:text-4xl font-bold tracking-tight">So'nggi Yangiliklar</h3>
-                                    <p className="text-muted-foreground text-lg">
+                                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">So'nggi Yangiliklar</h3>
+                                    <p className="text-muted-foreground text-sm sm:text-lg">
                                         AI dunyosidagi eng muhim voqealar va yangiliklar.
                                     </p>
                                 </div>
@@ -200,6 +196,7 @@ export default async function Home() {
                                             src={item.imageUrl || `https://picsum.photos/seed/${item.id}/800/500`}
                                             alt={item.title}
                                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            loading="lazy"
                                         />
                                     </div>
                                     <div className="flex flex-col flex-1 p-6">

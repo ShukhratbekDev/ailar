@@ -601,7 +601,6 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                                         className="pl-9 bg-background/50"
                                                         value={formData.sourceUrl}
                                                         onChange={handleInputChange}
-                                                        disabled
                                                     />
                                                 </div>
                                                 <div className="flex gap-4">

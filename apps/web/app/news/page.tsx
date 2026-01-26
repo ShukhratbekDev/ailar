@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, ArrowRight, Heart, Sparkles, TrendingUp, Zap, Plus, ChevronRight, Newspaper, Search } from "lucide-react";
 import { db } from "@/db";
 import { news } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { format } from "date-fns";
 import { uz } from "date-fns/locale";
 import { isEditor } from "@/lib/auth";
@@ -20,10 +20,9 @@ export default async function NewsPage({
 }) {
     const { search } = await searchParams;
 
-    const allNewsItems = await db.query.news.findMany({
-        orderBy: [desc(news.publishedAt)],
-        where: (news, { eq }) => eq(news.status, 'published')
-    });
+    const allNewsItems = await db.select().from(news)
+        .where(eq(news.status, 'published'))
+        .orderBy(desc(news.publishedAt));
 
     let filteredNews = [...allNewsItems];
 
@@ -44,16 +43,16 @@ export default async function NewsPage({
     return (
         <div className="min-h-screen bg-background">
             {/* Animated Background */}
-            <div className="fixed inset-0 -z-10 h-full w-full bg-background">
+            <div className="fixed inset-0 -z-10 h-full w-full bg-background overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:40px_40px]" />
-                <div className="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-3xl xl:-top-6 animate-pulse-glow">
-                    <div className="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-emerald-500 via-blue-500 to-purple-600 opacity-[0.12] animate-gradient-shift" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }} />
+                <div className="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-[80px] md:blur-[120px] xl:-top-6 animate-pulse-glow will-change-opacity">
+                    <div className="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-emerald-500/20 via-blue-500/10 to-purple-600/20 animate-gradient-shift will-change-transform" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }} />
                 </div>
-                <div className="absolute right-1/4 top-1/4 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl animate-float" />
+                <div className="absolute right-1/4 top-1/4 h-64 w-64 md:h-96 md:w-96 rounded-full bg-emerald-500/5 blur-3xl animate-float will-change-transform" />
             </div>
 
             {/* Hero Header */}
-            <div className="relative border-b border-border/40">
+            <div className="relative border-b border-border/40 pt-8">
                 <div className="container mx-auto px-4 md:px-6 py-12 md:py-16">
                     <div className="flex flex-col gap-6 animate-fade-in-up">
                         <div className="flex flex-col gap-6">
@@ -74,13 +73,13 @@ export default async function NewsPage({
                             </div>
 
                             <div className="space-y-6 max-w-3xl">
-                                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
+                                <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight px-1">
                                     So'nggi{" "}
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-blue-600 to-purple-600 animate-gradient-shift">
                                         Yangiliklar
                                     </span>
                                 </h1>
-                                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+                                <p className="text-base md:text-xl text-muted-foreground leading-relaxed max-w-2xl px-1">
                                     Sun'iy intellekt dunyosidagi eng muhim voqealar, tahlillar va ekspertlar fikrlari.
                                 </p>
                             </div>

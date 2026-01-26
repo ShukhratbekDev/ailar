@@ -20,10 +20,9 @@ export default async function ToolsPage({
     const { search, category } = await searchParams;
 
     // Fetch all published tools for initial list and categories
-    const publishedTools = await db.query.tools.findMany({
-        where: eq(tools.status, 'published'),
-        orderBy: [desc(tools.createdAt)]
-    });
+    const publishedTools = await db.select().from(tools)
+        .where(eq(tools.status, 'published'))
+        .orderBy(desc(tools.createdAt));
 
     // Get unique categories for the filter
     const categories = Array.from(new Set(publishedTools.map(t => t.category).filter(Boolean))) as string[];
@@ -53,15 +52,16 @@ export default async function ToolsPage({
     return (
         <div className="min-h-screen bg-background text-foreground">
             {/* Animated Background */}
-            <div className="fixed inset-0 -z-10 h-full w-full bg-background">
+            <div className="fixed inset-0 -z-10 h-full w-full bg-background overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:40px_40px]" />
-                <div className="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-3xl xl:-top-6 animate-pulse-glow">
-                    <div className="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-blue-500 via-purple-500 to-primary opacity-[0.08] animate-gradient-shift" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }} />
+                <div className="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-[80px] md:blur-[120px] xl:-top-6 animate-pulse-glow will-change-opacity">
+                    <div className="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-blue-500/20 via-purple-500/10 to-primary/20 animate-gradient-shift will-change-transform" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }} />
                 </div>
+                <div className="absolute right-1/4 top-1/4 h-64 w-64 md:h-96 md:w-96 rounded-full bg-blue-500/5 blur-3xl animate-float will-change-transform" />
             </div>
 
             {/* Hero Section */}
-            <div className="relative border-b border-border/40">
+            <div className="relative border-b border-border/40 pt-8">
                 <div className="container mx-auto px-4 md:px-6 py-10 md:py-12">
                     <div className="flex flex-col gap-6 animate-fade-in-up">
                         <div className="flex items-center justify-between w-full">
@@ -81,13 +81,13 @@ export default async function ToolsPage({
                         </div>
 
                         <div className="space-y-6 max-w-3xl">
-                            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
+                            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight px-1">
                                 AI Vositalar{" "}
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-primary animate-gradient-shift">
                                     To'plami
                                 </span>
                             </h1>
-                            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+                            <p className="text-base md:text-xl text-muted-foreground leading-relaxed max-w-2xl px-1">
                                 Eng yaxshi sun'iy intellekt vositalari — bir joyda. Ishingizni osonlashtiruvchi to'g'ri vositani toping.
                             </p>
                         </div>

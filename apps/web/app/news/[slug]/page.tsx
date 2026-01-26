@@ -106,19 +106,20 @@ export default async function NewsPage(props: NewsPageProps) {
             <ScrollProgress />
             <FloatingActionBar url={fullUrl} title={post.title} newsId={post.id} initialLikes={post.likes} hasLiked={hasLiked} />
 
-            {/* Navbar Placeholder (Back Button) */}
-            <div className="fixed top-24 left-0 w-full z-40 px-6 md:px-8 flex justify-between items-start pointer-events-none">
-                <Link href="/news" className="pointer-events-auto group inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-foreground transition-all bg-background/90 backdrop-blur-xl border border-border/50 rounded-full hover:shadow-lg shadow-sm">
-                    <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-                </Link>
-            </div>
-
             {/* Content Container */}
-            <div className="container max-w-7xl mx-auto px-4 pt-4 md:pt-8">
+            <div className="container max-w-7xl mx-auto px-4 pt-20 md:pt-28">
+
+                {/* Internal Navigation */}
+                <div className="mb-8 animate-fade-in-up">
+                    <Link href="/news" className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                        <span>Orqaga qaytish</span>
+                    </Link>
+                </div>
 
                 {/* Header Section */}
                 <header className="max-w-5xl md:max-w-6xl mb-10">
-                    <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between mb-8 animate-fade-in-up [animation-delay:100ms]">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between mb-8 animate-fade-in-up [animation-delay:100ms]">
                         <div className="flex items-center gap-3">
                             <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20 px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase border-0">
                                 Yangiliklar
@@ -127,21 +128,21 @@ export default async function NewsPage(props: NewsPageProps) {
                             <span className="text-sm font-medium text-muted-foreground">{formattedDate}</span>
                         </div>
 
-                        <div className="flex items-center gap-4 text-sm font-medium text-muted-foreground bg-muted/30 px-4 py-2 rounded-full border border-border/50">
-                            <div className="flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-primary" />
-                                <span>{Math.round(Number(post.readTime))} daqiqa o'qish</span>
+                        <div className="flex items-center gap-3 md:gap-4 text-[11px] md:text-sm font-medium text-muted-foreground bg-muted/30 px-3 md:px-4 py-1.5 md:py-2 rounded-full border border-border/50 w-fit">
+                            <div className="flex items-center gap-1.5 md:gap-2">
+                                <Clock className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
+                                <span>{Math.round(Number(post.readTime))} daqiqa</span>
                             </div>
                             <span className="text-border">|</span>
-                            <div className="flex items-center gap-2">
-                                <Eye className="h-4 w-4 text-primary" />
+                            <div className="flex items-center gap-1.5 md:gap-2">
+                                <Eye className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" />
                                 <span>{post.viewCount}</span>
                             </div>
                             {post.likes > 0 && (
                                 <>
                                     <span className="text-border">|</span>
-                                    <div className="flex items-center gap-2">
-                                        <Heart className="h-4 w-4 text-red-500 fill-current" />
+                                    <div className="flex items-center gap-1.5 md:gap-2">
+                                        <Heart className="h-3.5 w-3.5 md:h-4 md:w-4 text-red-500 fill-current" />
                                         <span>{post.likes}</span>
                                     </div>
                                 </>
@@ -149,11 +150,9 @@ export default async function NewsPage(props: NewsPageProps) {
                         </div>
                     </div>
 
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-black font-heading tracking-tight leading-[1.05] text-balance mb-10 max-w-5xl">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black font-heading tracking-tight leading-[1.05] text-balance mb-10 max-w-5xl px-1">
                         {post.title}
                     </h1>
-
-
                 </header>
             </div>
 

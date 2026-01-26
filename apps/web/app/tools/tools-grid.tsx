@@ -90,6 +90,7 @@ export function ToolsGrid({ initialTools, search = "", category = "" }: ToolsGri
                                         src={tool.imageUrl}
                                         alt={tool.name}
                                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        loading="lazy"
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-primary/5 flex items-center justify-center p-8">
@@ -121,7 +122,7 @@ export function ToolsGrid({ initialTools, search = "", category = "" }: ToolsGri
                                     {tool.logoUrl && (
                                         <div className="w-10 h-10 rounded-xl border border-border/50 bg-background p-1.5 shrink-0 shadow-sm flex items-center justify-center overflow-hidden">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={tool.logoUrl} alt="" className="w-full h-full object-contain" />
+                                            <img src={tool.logoUrl} alt="" className="w-full h-full object-contain" loading="lazy" />
                                         </div>
                                     )}
                                     <CardTitle className="text-xl group-hover:text-primary transition-colors line-clamp-1">
