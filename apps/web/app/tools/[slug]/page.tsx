@@ -69,11 +69,18 @@ export default async function ToolDetailPage({
             <ScrollProgress />
             <ToolFloatingActionBar url={fullUrl} title={tool.name} toolId={tool.id} initialVotes={tool.voteCount || 0} hasLiked={hasLiked} />
 
+            {/* Desktop Back Button (Fixed) */}
+            <div className="hidden md:flex fixed top-24 left-0 w-full z-40 px-8 justify-between items-start pointer-events-none">
+                <Link href="/tools" className="pointer-events-auto group inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-foreground transition-all bg-background/90 backdrop-blur-xl border border-border/50 rounded-full hover:shadow-lg shadow-sm">
+                    <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+                </Link>
+            </div>
+
             {/* Content Container */}
             <div className="container max-w-7xl mx-auto px-4 pt-20 md:pt-28">
 
-                {/* Internal Navigation */}
-                <div className="mb-8 animate-fade-in-up">
+                {/* Mobile Navigation (In-flow) */}
+                <div className="md:hidden mb-8 animate-fade-in-up">
                     <Link href="/tools" className="group inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
                         <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
                         <span>Barcha vositalar</span>
