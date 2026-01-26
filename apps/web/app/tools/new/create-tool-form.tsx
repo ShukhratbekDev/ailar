@@ -256,7 +256,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
         <main className="min-h-screen bg-background pb-20 relative">
             <div className="fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,rgba(59,130,246,0.05),transparent_50%)]" />
 
-            <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40">
+            <div className="relative pt-16 bg-background border-b border-border/40">
                 <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" asChild className="rounded-full">

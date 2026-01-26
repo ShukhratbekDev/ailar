@@ -218,7 +218,7 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px] opacity-20" />
             </div>
             {/* Header */}
-            <div className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40 supports-[backdrop-filter]:bg-background/60">
+            <div className="relative pt-16 bg-background border-b border-border/40">
                 <div className="container max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" size="icon" asChild className="rounded-full">
