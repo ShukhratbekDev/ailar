@@ -180,9 +180,14 @@ function createPlatformMessage(
     }
 
     // Add hashtags
-    const hashtagString = '\n\n' + hashtags.map(tag => `#${tag.replace(/\s+/g, '')}`).join(' ');
+    // Sanitize hashtags: only allow alphanumeric characters and underscores for Telegram compatibility
+    const sanitizedHashtags = hashtags.map(tag => {
+        const clean = tag.replace(/[^a-zA-Z0-9_]/g, '');
+        return clean.length > 0 ? `#${clean}` : null;
+    }).filter(Boolean);
 
-    // Add Call to Action / Link
+    const hashtagString = sanitizedHashtags.length > 0 ? '\n\n' + sanitizedHashtags.join(' ') : '';
+
     // Add Call to Action / Link
     // For Telegram, we use an inline button (handled in sendTelegramMessage), so we don't need text here
     const linkText = platform === 'telegram'
@@ -221,10 +226,11 @@ export async function postToTelegram(
             .replace(/>/g, '&gt;');
 
         // Format for Telegram HTML
+        // Use + instead of * in regex to ensure we don't create empty tags <b></b> which Telegram might reject
         const htmlMessage = escapedMessage
-            .replace(/&lt;b&gt;(.*?)&lt;\/b&gt;/g, '<b>$1</b>') // If we had tags already
-            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // Bold
-            .replace(/\*(.*?)\*/g, '<i>$1</i>'); // Italic
+            .replace(/&lt;b&gt;(.+?)&lt;\/b&gt;/g, '<b>$1</b>') // If we had tags already
+            .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') // Bold
+            .replace(/\*(.+?)\*/g, '<i>$1</i>'); // Italic
 
         await sendTelegramMessage(
             htmlMessage,
