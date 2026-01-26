@@ -27,6 +27,8 @@ const toolSchema = z.object({
     features: z.string().nullish(),
     pros: z.string().nullish(),
     cons: z.string().nullish(),
+    screenshots: z.string().nullish(), // Comma separated URLs
+    videoUrl: z.string().url("Noto'g'ri video URL format").nullish().or(z.literal('')),
     isFeatured: z.boolean().default(false).optional(),
 });
 
@@ -67,6 +69,8 @@ export async function createTool(prevState: any, formData: FormData) {
         features: formData.get('features'),
         pros: formData.get('pros'),
         cons: formData.get('cons'),
+        screenshots: formData.get('screenshots'),
+        videoUrl: formData.get('videoUrl'),
     };
 
     const validatedFields = toolSchema.safeParse(rawData);
@@ -142,6 +146,8 @@ export async function createTool(prevState: any, formData: FormData) {
             features: data.features ? data.features.split('\n').map(s => s.trim()) : [],
             pros: data.pros ? data.pros.split('\n').map(s => s.trim()) : [],
             cons: data.cons ? data.cons.split('\n').map(s => s.trim()) : [],
+            screenshots: data.screenshots ? data.screenshots.split(',').map(s => s.trim()) : [],
+            videoUrl: data.videoUrl || null,
             isFeatured: data.isFeatured ?? false,
             status,
             publishedAt,
@@ -298,33 +304,50 @@ export async function getTools({
     page = 1,
     limit = 12,
     search = "",
-    category = ""
+    category = "",
+    pricingType = "",
+    sortBy = "newest" // newest, popular, views
 }: {
     page?: number;
     limit?: number;
     search?: string;
     category?: string;
+    pricingType?: string;
+    sortBy?: string;
 } = {}) {
     try {
+        const { userId } = await auth();
         const offset = (page - 1) * limit;
 
-        // Fetch published tools
-        let allPublishedTools = await db.query.tools.findMany({
-            where: eq(tools.status, 'published'),
-            orderBy: [desc(tools.createdAt)]
-        });
+        // Using Drizzle to filter directly on DB for better performance
+        const conditions = [];
+        conditions.push(eq(tools.status, 'published'));
 
-        // Apply theme/category filter
         if (category && category !== "all") {
-            allPublishedTools = allPublishedTools.filter(tool =>
-                tool.category?.toLowerCase() === category.toLowerCase()
-            );
+            conditions.push(eq(tools.category, category));
         }
 
-        // Apply search filter
+        if (pricingType && pricingType !== "all") {
+            conditions.push(eq(tools.pricingType, pricingType));
+        }
+
+        // Determine sort expression
+        let orderByClause = desc(tools.createdAt);
+        if (sortBy === 'popular') {
+            orderByClause = desc(tools.voteCount);
+        } else if (sortBy === 'views') {
+            orderByClause = desc(tools.viewCount);
+        }
+
+        const allTools = await db.select().from(tools)
+            .where(and(...conditions))
+            .orderBy(orderByClause);
+
+        // Client-side search for better flexibility with tags/description
+        let filteredTools = allTools;
         if (search) {
             const searchLower = search.toLowerCase();
-            allPublishedTools = allPublishedTools.filter(tool =>
+            filteredTools = allTools.filter(tool =>
                 tool.name?.toLowerCase().includes(searchLower) ||
                 tool.description?.toLowerCase().includes(searchLower) ||
                 tool.category?.toLowerCase().includes(searchLower) ||
@@ -332,8 +355,22 @@ export async function getTools({
             );
         }
 
-        // Return only the requested page
-        return allPublishedTools.slice(offset, offset + limit);
+        const pagedTools = filteredTools.slice(offset, offset + limit);
+
+        // Fetch likes if user is logged in
+        let likedToolIds = new Set<number>();
+        if (userId) {
+            const userLikes = await db.select({ toolId: toolLikes.toolId })
+                .from(toolLikes)
+                .where(eq(toolLikes.userId, userId));
+            userLikes.forEach(like => likedToolIds.add(like.toolId));
+        }
+
+        return pagedTools.map(tool => ({
+            ...tool,
+            isLiked: likedToolIds.has(tool.id)
+        }));
+
     } catch (error) {
         console.error("Fetch Tools Error:", error);
         return [];

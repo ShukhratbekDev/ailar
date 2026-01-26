@@ -36,7 +36,7 @@ export function LikeButton({ newsId, initialLikes, hasLiked }: LikeButtonProps) 
 
         try {
             await toggleLike(newsId);
-            toast.success(newLiked ? "Yoqdi!" : "Yoqtirish bekor qilindi");
+            toast.success(newLiked ? "Yoqdi" : "Yoqmadi");
         } catch (error) {
             // Revert on error
             setLiked(!newLiked);

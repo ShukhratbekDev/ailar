@@ -8,15 +8,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { FloatingActionBar, ScrollProgress, SocialShare, ArticleActions, NewsViewTracker } from './client-components';
 import { MarkdownPreview } from '@/components/markdown-preview';
 import { db } from '@/db';
-import { news } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { news, newsLikes, discussions } from '@/db/schema';
+import { eq, and, ne, desc, asc } from 'drizzle-orm';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
 import { auth } from '@clerk/nextjs/server';
-import { newsLikes } from '@/db/schema';
-import { and } from 'drizzle-orm';
+import { isEditor } from '@/lib/auth';
+import { DiscussionSection } from '@/components/discussions/discussion-section';
 
 interface NewsPageProps {
     params: Promise<{
@@ -25,28 +25,35 @@ interface NewsPageProps {
 }
 
 export async function generateMetadata(props: NewsPageProps): Promise<Metadata> {
-    const params = await props.params;
-    const { slug } = params;
-    const post = await db.query.news.findFirst({
-        where: eq(news.slug, slug),
-    });
+    try {
+        const params = await props.params;
+        const { slug } = params;
+        const post = await db.query.news.findFirst({
+            where: eq(news.slug, slug),
+        });
 
-    if (!post) {
+        if (!post) {
+            return {
+                title: "Yangilik topilmadi",
+                description: "Qidirilayotgan yangilik topilmadi.",
+            };
+        }
+
         return {
-            title: "Yangilik topilmadi",
-            description: "Qidirilayotgan yangilik topilmadi.",
-        };
-    }
-
-    return {
-        title: post.title,
-        description: post.description || post.title,
-        openGraph: {
             title: post.title,
             description: post.description || post.title,
-            images: post.imageUrl ? [post.imageUrl] : [],
-        },
-    };
+            openGraph: {
+                title: post.title,
+                description: post.description || post.title,
+                images: post.imageUrl ? [post.imageUrl] : [],
+            },
+        };
+    } catch (error) {
+        return {
+            title: "Ailar Yangiliklari",
+            description: "Sun'iy intellekt dunyosidagi eng so'nggi xabarlar",
+        };
+    }
 }
 
 export default async function NewsPage(props: NewsPageProps) {
@@ -58,24 +65,38 @@ export default async function NewsPage(props: NewsPageProps) {
         with: {
             author: true
         }
-    });
-
-    const { userId } = await auth();
-    let hasLiked = false;
-
-    if (userId && dbPost) {
-        const like = await db.query.newsLikes.findFirst({
-            where: and(
-                eq(newsLikes.newsId, dbPost.id),
-                eq(newsLikes.userId, userId)
-            )
-        });
-        hasLiked = !!like;
-    }
+    }).catch(() => null);
 
     if (!dbPost) {
         notFound();
     }
+
+    const { userId } = await auth();
+    const hasPermission = await isEditor();
+
+    // Parallel fetching for related data
+    const [like, newsComments, relatedNews] = await Promise.all([
+        userId ? db.query.newsLikes.findFirst({
+            where: and(
+                eq(newsLikes.newsId, dbPost.id),
+                eq(newsLikes.userId, userId)
+            )
+        }) : Promise.resolve(null),
+        db.query.discussions.findMany({
+            where: eq(discussions.newsId, dbPost.id),
+            orderBy: [asc(discussions.createdAt)]
+        }),
+        db.query.news.findMany({
+            where: and(
+                ne(news.id, dbPost.id),
+                eq(news.status, 'published')
+            ),
+            limit: 3,
+            orderBy: desc(news.publishedAt)
+        })
+    ]);
+
+    const hasLiked = !!like;
 
     const post = {
         ...dbPost,
@@ -100,8 +121,27 @@ export default async function NewsPage(props: NewsPageProps) {
 
     const fullUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://ailar.uz"}/news/${post.slug}`;
 
+    // Schema.org JSON-LD
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": post.title,
+        "image": post.imageUrl ? [post.imageUrl] : [],
+        "datePublished": post.publishedAt?.toISOString(),
+        "dateModified": post.publishedAt?.toISOString(), // fallback
+        "author": [{
+            "@type": "Person",
+            "name": post.author.name
+        }]
+    };
+
     return (
-        <main className="min-h-screen bg-background text-foreground pb-32 relative selection:bg-primary/20">
+        <main className="min-h-screen bg-background text-foreground pb-20 relative selection:bg-primary/20">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+
             <NewsViewTracker newsId={post.id} />
             <ScrollProgress />
             <FloatingActionBar url={fullUrl} title={post.title} newsId={post.id} initialLikes={post.likes} hasLiked={hasLiked} />
@@ -272,6 +312,18 @@ export default async function NewsPage(props: NewsPageProps) {
                                 ))}
                             </div>
                         </div>
+
+                        {/* Discussion Section */}
+                        <div className="mt-16">
+                            <DiscussionSection
+                                targetId={post.id}
+                                targetType="news"
+                                initialComments={newsComments as any}
+                                title="Maqola Muhokamasi"
+                                currentUserId={userId}
+                                isEditor={hasPermission}
+                            />
+                        </div>
                     </div>
 
                     {/* Right Actions (Floating/Sticky) */}
@@ -284,7 +336,44 @@ export default async function NewsPage(props: NewsPageProps) {
                 </div>
             </div>
 
-
+            {/* Read Next Section */}
+            {relatedNews.length > 0 && (
+                <div className="mt-20 border-t border-border/40 bg-muted/20 py-16">
+                    <div className="container max-w-7xl mx-auto px-4">
+                        <div className="flex items-center justify-between mb-10">
+                            <h3 className="text-3xl font-black font-heading tracking-tight">O'qishni davom eting</h3>
+                            <Link href="/news" className="text-sm font-bold text-primary hover:underline">Barchasini ko'rish</Link>
+                        </div>
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {relatedNews.map((item) => (
+                                <Link key={item.id} href={`/news/${item.slug}`} className="group block">
+                                    <article className="flex flex-col h-full rounded-3xl border border-border/50 bg-card overflow-hidden hover:border-border hover:shadow-xl transition-all duration-300">
+                                        <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                                            <img
+                                                src={item.imageUrl || `https://picsum.photos/seed/${item.id}/800/500`}
+                                                alt={item.title}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col flex-1 p-6">
+                                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-3">
+                                                <Calendar className="h-3 w-3" />
+                                                {item.publishedAt ? format(new Date(item.publishedAt), 'd MMM', { locale: uz }) : ''}
+                                            </div>
+                                            <h4 className="text-lg font-bold mb-2 leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                                                {item.title}
+                                            </h4>
+                                            <div className="mt-auto pt-2 text-xs font-bold text-primary flex items-center">
+                                                O'qish <ChevronRight className="h-3 w-3 ml-1 group-hover:translate-x-1 transition-transform" />
+                                            </div>
+                                        </div>
+                                    </article>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

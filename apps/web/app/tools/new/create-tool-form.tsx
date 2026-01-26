@@ -86,6 +86,8 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
         features: '',
         pros: '',
         cons: '',
+        screenshots: '',
+        videoUrl: '',
         imagePrompt: ''
     });
 
@@ -134,6 +136,8 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 features: Array.isArray(result.features) ? result.features.join('\n') : prev.features,
                 pros: Array.isArray(result.pros) ? result.pros.join('\n') : prev.pros,
                 cons: Array.isArray(result.cons) ? result.cons.join('\n') : prev.cons,
+                screenshots: Array.isArray(result.screenshots) ? result.screenshots.join(',') : prev.screenshots,
+                videoUrl: result.videoUrl || prev.videoUrl,
                 url: aiContext.trim().split(/\s+/)[0]?.startsWith('http') ? aiContext.trim().split(/\s+/)[0] || prev.url : prev.url
             }));
 
@@ -466,6 +470,45 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                 </div>
                             )}
 
+                            <div className="space-y-1.5 pt-4 border-t border-white/5">
+                                <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Skrinshotlar (Galereya)</Label>
+                                <div className="grid grid-cols-4 gap-2 mb-2">
+                                    {formData.screenshots.split(',').filter(Boolean).map((s, i) => (
+                                        <div key={i} className="aspect-video relative rounded-md overflow-hidden bg-muted group">
+                                            <img src={s} className="w-full h-full object-cover" alt="" />
+                                            <button
+                                                onClick={() => {
+                                                    const current = formData.screenshots.split(',').filter(Boolean);
+                                                    const updated = current.filter((_, idx) => idx !== i);
+                                                    setFormData(p => ({ ...p, screenshots: updated.join(',') }));
+                                                }}
+                                                className="absolute top-0.5 right-0.5 h-4 w-4 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                type="button"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Textarea
+                                    className="h-16 text-[10px] resize-none bg-background/50 border-white/5"
+                                    placeholder="Skrinshot URLlar (vergul bilan)..."
+                                    value={formData.screenshots}
+                                    onChange={(e) => setFormData(p => ({ ...p, screenshots: e.target.value }))}
+                                />
+                                {extractedImages.length > 0 && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full h-6 text-[9px] mt-1"
+                                        onClick={() => setFormData(p => ({ ...p, screenshots: extractedImages.join(',') }))}
+                                        type="button"
+                                    >
+                                        Barcha rasmlarni galereyaga qo'shish
+                                    </Button>
+                                )}
+                            </div>
+
 
                             <div className="space-y-1.5">
                                 <div className="flex items-center justify-between">
@@ -699,6 +742,13 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                         {TOOL_TYPES.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                                     </select>
                                 </div>
+                                <div className="space-y-2">
+                                    <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Video Demo URL</Label>
+                                    <div className="relative">
+                                        <Maximize2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                        <Input name="videoUrl" value={formData.videoUrl} onChange={handleInputChange} className="pl-10 h-11 bg-background/50" placeholder="https://youtube.com/..." />
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="space-y-4">
@@ -787,6 +837,8 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                         </Card>
 
                         <input type="hidden" name="content_hidden" value={formData.content} />
+                        <input type="hidden" name="screenshots" value={formData.screenshots} />
+                        <input type="hidden" name="videoUrl" value={formData.videoUrl} />
                     </form>
                 </div >
             </div >

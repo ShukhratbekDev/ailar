@@ -10,44 +10,42 @@ import { eq, desc } from "drizzle-orm";
 import { ToolsSearch } from "./tools-search";
 import { ToolsGrid } from "./tools-grid";
 import { CategoryFilter } from "./category-filter";
+import { getTools } from "@/app/actions/tools";
+import { cn } from "@/lib/utils";
 
 export default async function ToolsPage({
     searchParams,
 }: {
-    searchParams: Promise<{ search?: string; category?: string }>;
+    searchParams: Promise<{ search?: string; category?: string; pricing?: string; sort?: string }>;
 }) {
     const userIsEditor = await isEditor();
-    const { search, category } = await searchParams;
+    const { search, category, pricing, sort } = await searchParams;
 
-    // Fetch all published tools for initial list and categories
+    // Fetch all tools to calculate counts
     const publishedTools = await db.select().from(tools)
-        .where(eq(tools.status, 'published'))
-        .orderBy(desc(tools.createdAt));
+        .where(eq(tools.status, 'published'));
 
-    // Get unique categories for the filter
+    // Category counts logic
+    const categoryCounts = publishedTools.reduce((acc, item) => {
+        if (item.category) {
+            acc[item.category] = (acc[item.category] || 0) + 1;
+        }
+        return acc;
+    }, {} as Record<string, number>);
+
+    // Fetch current tools based on filters
+    const initialToolsData = await getTools({
+        search: search || "",
+        category: category || "all",
+        pricingType: pricing || "all",
+        sortBy: sort || "newest",
+        limit: 12
+    });
+
+    const gridTools = initialToolsData;
+
     const categories = Array.from(new Set(publishedTools.map(t => t.category).filter(Boolean))) as string[];
-
-    let allTools = [...publishedTools];
-
-    // Apply category filtering
-    if (category && category !== "all") {
-        allTools = allTools.filter(tool =>
-            tool.category?.toLowerCase() === category.toLowerCase()
-        );
-    }
-
-    // Client-side filtering for tags (since tags are JSON array)
-    if (search) {
-        const searchLower = search.toLowerCase();
-        allTools = allTools.filter(tool =>
-            tool.name?.toLowerCase().includes(searchLower) ||
-            tool.description?.toLowerCase().includes(searchLower) ||
-            tool.category?.toLowerCase().includes(searchLower) ||
-            tool.tags?.some(tag => tag.toLowerCase().includes(searchLower))
-        );
-    }
-
-    const initialTools = allTools.slice(0, 12);
+    const categoryPairs = categories.map(c => ({ name: c, count: categoryCounts[c] || 0 }));
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -61,9 +59,9 @@ export default async function ToolsPage({
             </div>
 
             {/* Hero Section */}
-            <div className="relative border-b border-border/40 pt-8">
-                <div className="container mx-auto px-4 md:px-6 py-10 md:py-12">
-                    <div className="flex flex-col gap-6 animate-fade-in-up">
+            <div className="relative border-b border-border/40 pt-24 pb-12 overflow-hidden">
+                <div className="container mx-auto px-4 md:px-6 relative z-10">
+                    <div className="flex flex-col gap-8 animate-fade-in-up">
                         <div className="flex items-center justify-between w-full">
                             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-semibold">
                                 <Bot className="h-3.5 w-3.5" />
@@ -80,54 +78,180 @@ export default async function ToolsPage({
                             )}
                         </div>
 
-                        <div className="space-y-6 max-w-3xl">
-                            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight px-1">
+                        <div className="space-y-6">
+                            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight px-1 text-left">
                                 AI Vositalar{" "}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-purple-600 to-primary animate-gradient-shift">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-primary animate-gradient-shift">
                                     To'plami
                                 </span>
                             </h1>
-                            <p className="text-base md:text-xl text-muted-foreground leading-relaxed max-w-2xl px-1">
+                            <p className="text-base md:text-xl text-muted-foreground leading-relaxed px-1">
                                 Eng yaxshi sun'iy intellekt vositalari — bir joyda. Ishingizni osonlashtiruvchi to'g'ri vositani toping.
                             </p>
                         </div>
 
-                        <div className="flex flex-col items-center gap-4 mt-6 w-full max-w-4xl mx-auto">
-                            {/* Search Bar */}
-                            <div className="flex w-full justify-center">
-                                <ToolsSearch />
+                        <div className="flex flex-col gap-8">
+                            {/* Topic Hub (Categories with Counts) */}
+                            <div className="flex flex-col gap-4 w-full">
+                                <div className="flex items-center gap-2 px-1">
+                                    <Sparkles className="h-3 w-3 text-blue-500" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Kategoriyalar</span>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <Link href="/tools" scroll={false}>
+                                        <Badge
+                                            variant={(!category || category === 'all') ? "default" : "outline"}
+                                            className={cn(
+                                                "whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium cursor-pointer transition-all",
+                                                (!category || category === 'all')
+                                                    ? "bg-foreground text-background shadow-md transform scale-105 hover:bg-foreground/90"
+                                                    : "bg-background/50 hover:bg-muted text-muted-foreground hover:text-foreground border-border/50"
+                                            )}
+                                        >
+                                            Hammasi ({publishedTools.length})
+                                        </Badge>
+                                    </Link>
+                                    {categoryPairs.map((cat) => {
+                                        const isActive = category === cat.name;
+                                        return (
+                                            <Link
+                                                key={cat.name}
+                                                href={`/tools?category=${encodeURIComponent(cat.name)}`}
+                                                scroll={false}
+                                            >
+                                                <Badge
+                                                    variant={isActive ? "default" : "outline"}
+                                                    className={cn(
+                                                        "whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium cursor-pointer transition-all",
+                                                        isActive
+                                                            ? "bg-blue-600 text-white shadow-md transform scale-105 hover:bg-blue-700"
+                                                            : "bg-background/50 hover:bg-muted text-muted-foreground hover:text-foreground border-border/50"
+                                                    )}
+                                                >
+                                                    {cat.name} ({cat.count})
+                                                </Badge>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
-                            {/* Category Filters */}
-                            <div className="flex flex-col items-center gap-4 w-full">
-                                <CategoryFilter categories={categories} />
+                            <div className="flex flex-col gap-8 w-full">
+                                <div className="flex flex-wrap items-center gap-x-12 gap-y-7">
+                                    {/* Pricing Filter Group */}
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex items-center gap-2 px-1">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">To'lov turi</span>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2 p-1 bg-muted/30 rounded-2xl border border-border/40 w-fit">
+                                            {[
+                                                { id: 'all', label: 'Barchasi' },
+                                                { id: 'free', label: 'Bepul' },
+                                                { id: 'freemium', label: 'Freemium' },
+                                                { id: 'paid', label: 'Pullik' }
+                                            ].map(p => (
+                                                <Link
+                                                    key={p.id}
+                                                    href={`/tools?${new URLSearchParams({
+                                                        ...(search && { search }),
+                                                        ...(category && { category }),
+                                                        pricing: p.id,
+                                                        ...(sort && { sort })
+                                                    }).toString()}`}
+                                                    className={cn(
+                                                        "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all",
+                                                        (pricing === p.id || (!pricing && p.id === 'all'))
+                                                            ? "bg-background text-foreground shadow-sm"
+                                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                                    )}
+                                                >
+                                                    {p.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Sort Filter Group */}
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex items-center gap-2 px-1">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/40">Saralash</span>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2 p-1 bg-muted/30 rounded-2xl border border-border/40 w-fit">
+                                            {[
+                                                { id: 'newest', label: 'Yangilar' },
+                                                { id: 'popular', label: 'Mashhur' },
+                                                { id: 'views', label: 'Ko\'rib' }
+                                            ].map(s => (
+                                                <Link
+                                                    key={s.id}
+                                                    href={`/tools?${new URLSearchParams({
+                                                        ...(search && { search }),
+                                                        ...(category && { category }),
+                                                        ...(pricing && { pricing }),
+                                                        sort: s.id
+                                                    }).toString()}`}
+                                                    className={cn(
+                                                        "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all whitespace-nowrap",
+                                                        (sort === s.id || (!sort && s.id === 'newest'))
+                                                            ? "bg-background text-foreground shadow-sm"
+                                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                                    )}
+                                                >
+                                                    {s.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="w-full">
+                                    <ToolsSearch />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <main className="container mx-auto px-4 md:px-6 py-6 md:py-8">
-                <div className="space-y-8">
-                    {initialTools.length > 0 ? (
-                        <ToolsGrid initialTools={initialTools} search={search} category={category} />
+            <main className="container mx-auto px-4 md:px-6 py-12 md:py-16 space-y-16">
+
+
+                <div className="space-y-12">
+                    {/* Header for grid when filtered */}
+                    {(search || (category && category !== 'all')) && (
+                        <div className="flex items-center justify-between pb-4 border-b border-border/40">
+                            <h3 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                                {search ? `Qidiruv: "${search}"` : `#${category}`}
+                                <span className="text-xs font-medium text-muted-foreground bg-muted px-2.5 py-1 rounded-full">{gridTools.length} ta natija</span>
+                            </h3>
+                            <Link href="/tools" className="text-sm font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors">
+                                Tozalash <X className="h-4 w-4" />
+                            </Link>
+                        </div>
+                    )}
+
+                    {gridTools.length > 0 ? (
+                        <ToolsGrid
+                            initialTools={gridTools}
+                            search={search}
+                            category={category}
+                            pricingType={pricing}
+                            sortBy={sort}
+                        />
                     ) : (
-                        <div className="col-span-full py-20 text-center space-y-4 rounded-3xl border-2 border-dashed border-border/40 bg-card/10 backdrop-blur-sm">
-                            <div className="w-20 h-20 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <div className="col-span-full py-32 text-center space-y-6 rounded-[3rem] border-2 border-dashed border-border/40 bg-card/5 backdrop-blur-sm">
+                            <div className="w-24 h-24 bg-blue-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6 animate-pulse">
                                 <Search className="h-10 w-10 text-blue-500" />
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-2xl font-bold">Hech narsa topilmadi</p>
-                                <p className="text-muted-foreground max-w-md mx-auto">Siz qidirayotgan vosita hozircha mavjud emas. Qidiruv so'zini o'zgartirib ko'ring.</p>
+                            <div className="space-y-2">
+                                <p className="text-3xl font-black">Natija yo'q</p>
+                                <p className="text-muted-foreground max-w-md mx-auto font-light">Siz qidirayotgan vosita hozircha mavjud emas yoki filterlarga mos kelmadi.</p>
                             </div>
-                            {userIsEditor && (
-                                <Link href="/tools/new">
-                                    <Button variant="outline" className="mt-4 rounded-full px-8 py-6 border-blue-500/20 hover:bg-blue-500/10">
-                                        Birinchi vositani qo'shish
-                                    </Button>
-                                </Link>
-                            )}
+                            <Link href="/tools">
+                                <Button variant="outline" className="mt-8 rounded-full px-10 h-14 font-black border-blue-500/20 hover:bg-blue-500/10">
+                                    Qidiruvni tozalash
+                                </Button>
+                            </Link>
                         </div>
                     )}
                 </div>

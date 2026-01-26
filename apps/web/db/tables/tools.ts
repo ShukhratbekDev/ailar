@@ -23,6 +23,10 @@ export const tools = pgTable("tools", {
     pros: text("pros").array(),
     cons: text("cons").array(),
 
+    // Media
+    screenshots: text("screenshots").array(), // Multi-image support for gallery
+    videoUrl: text("video_url"),             // Video demo support
+
     // Engagement & Stats
     isFeatured: boolean("is_featured").default(false),
 

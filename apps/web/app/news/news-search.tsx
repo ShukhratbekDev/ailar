@@ -4,8 +4,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Search, X, Loader2 } from "lucide-react";
 import { useState, useEffect, useTransition } from "react";
+import { cn } from "@/lib/utils";
 
-export function NewsSearch() {
+export function NewsSearch({ size = "default" }: { size?: "default" | "sm" }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [searchValue, setSearchValue] = useState(searchParams.get("search") || "");
@@ -39,16 +40,22 @@ export function NewsSearch() {
             <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-blue-500/20 to-purple-500/20 rounded-[2rem] blur-xl opacity-30 group-focus-within:opacity-100 transition-opacity duration-500" />
 
             <div className="relative flex items-center">
-                <div className="absolute left-5 text-muted-foreground group-focus-within:text-emerald-500 transition-colors duration-300">
+                <div className={cn(
+                    "absolute text-muted-foreground group-focus-within:text-emerald-500 transition-colors duration-300",
+                    size === "sm" ? "left-4" : "left-5"
+                )}>
                     {isPending ? (
-                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <Loader2 className={cn("animate-spin", size === "sm" ? "h-4 w-4" : "h-5 w-5")} />
                     ) : (
-                        <Search className="h-5 w-5" />
+                        <Search className={cn(size === "sm" ? "h-4 w-4" : "h-5 w-5")} />
                     )}
                 </div>
 
                 <Input
-                    className="h-14 pl-14 pr-12 rounded-full border-emerald-500/20 bg-background shadow-xl focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300 text-lg placeholder:text-muted-foreground/70"
+                    className={cn(
+                        "rounded-full border-emerald-500/20 bg-background shadow-xl focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all duration-300",
+                        size === "sm" ? "h-11 pl-12 pr-10 text-sm" : "h-14 pl-14 pr-12 text-lg placeholder:text-muted-foreground/70"
+                    )}
                     placeholder="Eng so'nggi yangiliklarni izlang..."
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
@@ -57,17 +64,23 @@ export function NewsSearch() {
                 {searchValue && (
                     <button
                         onClick={() => setSearchValue("")}
-                        className="absolute right-4 p-2 rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-200"
+                        className={cn(
+                            "absolute p-2 rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-200",
+                            size === "sm" ? "right-2" : "right-4"
+                        )}
                         title="Tozalash"
                     >
-                        <X className="h-4 w-4" />
+                        <X className={cn(size === "sm" ? "h-3 w-3" : "h-4 w-4")} />
                     </button>
                 )}
             </div>
 
             {/* Decorative bottom line */}
             {/* Decorative bottom line - Always slightly visible */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[1.5px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-100 group-focus-within:via-emerald-500 transition-all duration-500" />
+            <div className={cn(
+                "absolute bottom-0 left-1/2 -translate-x-1/2 h-[1.5px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent opacity-100 group-focus-within:via-emerald-500 transition-all duration-500",
+                size === "sm" ? "w-1/4" : "w-1/2"
+            )} />
         </div>
     );
 }

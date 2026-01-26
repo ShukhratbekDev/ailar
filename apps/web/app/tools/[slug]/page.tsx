@@ -13,20 +13,23 @@ import {
     XCircle,
     Calendar,
     ArrowUpRight,
+    Play,
+    Layout
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { isEditor, isAdmin } from "@/lib/auth";
 import { ToolViewTracker, ScrollProgress, ToolFloatingActionBar, SocialShare, ToolLikeButton, ToolActions, ToolAdminActions } from "./client-components";
 import { db } from "@/db";
-import { tools, toolLikes } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { tools, toolLikes, discussions } from "@/db/schema";
+import { eq, and, ne, desc } from "drizzle-orm";
 import { format } from "date-fns";
 import { uz } from "date-fns/locale";
 import { MarkdownPreview } from '@/components/markdown-preview';
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { auth } from "@clerk/nextjs/server";
+import { DiscussionSection } from "@/components/discussions/discussion-section";
 
 export default async function ToolDetailPage({
     params,
@@ -43,15 +46,16 @@ export default async function ToolDetailPage({
         notFound();
     }
 
-    const { userId } = await auth();
+    const { userId: currentUserId } = await auth();
     const admin = await isAdmin();
+    const editor = await isEditor();
     let hasLiked = false;
 
-    if (userId) {
+    if (currentUserId) {
         const like = await db.query.toolLikes.findFirst({
             where: and(
                 eq(toolLikes.toolId, tool.id),
-                eq(toolLikes.userId, userId)
+                eq(toolLikes.userId, currentUserId)
             )
         });
         hasLiked = !!like;
@@ -62,6 +66,23 @@ export default async function ToolDetailPage({
         : format(new Date(tool.createdAt || new Date()), "d MMM, yyyy", { locale: uz });
 
     const fullUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://ailar.uz"}/tools/${tool.slug}`;
+
+    // Fetch Similar Tools
+    const similarTools = await db.query.tools.findMany({
+        where: and(
+            eq(tools.category, tool.category || ""),
+            eq(tools.status, 'published'),
+            ne(tools.id, tool.id)
+        ),
+        limit: 4,
+        orderBy: [desc(tools.viewCount)]
+    });
+
+    // Fetch Discussions
+    const toolDiscussions = await db.query.discussions.findMany({
+        where: eq(discussions.toolId, tool.id),
+        orderBy: [desc(discussions.createdAt)]
+    });
 
     return (
         <main className="min-h-screen bg-background text-foreground pb-32 relative selection:bg-primary/20">
@@ -169,7 +190,7 @@ export default async function ToolDetailPage({
 
             <div className="container max-w-7xl mx-auto px-4">
                 {/* Grid Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
 
                     {/* Left Sidebar (Desktop - Tool Info) */}
                     <div className="hidden lg:block lg:col-span-3 space-y-8">
@@ -199,7 +220,7 @@ export default async function ToolDetailPage({
                                 </div>
 
                                 {tool.url && (
-                                    <Button className="w-full rounded-full font-bold shadow-lg shadow-primary/20" asChild>
+                                    <Button className="w-full rounded-full font-bold shadow-lg shadow-primary/20 h-12" asChild>
                                         <a href={tool.url} target="_blank" rel="noopener noreferrer">
                                             Websaytga o'tish <ExternalLink className="ml-2 w-4 h-4" />
                                         </a>
@@ -244,31 +265,81 @@ export default async function ToolDetailPage({
                     </div>
 
                     {/* Main Content */}
-                    <div className="lg:col-span-8 lg:col-start-4 space-y-12">
+                    <div className="lg:col-span-8 lg:col-start-4 space-y-20">
                         {/* Features List */}
                         {tool.features && tool.features.length > 0 && (
                             <div className="grid sm:grid-cols-2 gap-4">
                                 {tool.features.map((feature, i) => (
-                                    <div key={i} className="flex gap-3 items-start p-4 rounded-xl bg-muted/30 border border-border/50">
-                                        <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                                        <span className="text-sm font-medium opacity-90">{feature}</span>
+                                    <div key={i} className="flex gap-3 items-start p-6 rounded-2xl bg-muted/30 border border-border/50 hover:bg-muted/40 transition-colors group">
+                                        <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                                        <span className="text-base font-medium opacity-90">{feature}</span>
                                     </div>
                                 ))}
+                            </div>
+                        )}
+
+                        {/* Screenshots Gallery */}
+                        {tool.screenshots && tool.screenshots.length > 0 && (
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-2 mb-6">
+                                    <Layout className="h-5 w-5 text-primary" />
+                                    <h3 className="text-2xl font-black font-heading tracking-tight">Vizuallar</h3>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {tool.screenshots.map((shot, i) => (
+                                        <div key={i} className={cn(
+                                            "relative rounded-3xl overflow-hidden border border-border/50 bg-muted/20 aspect-video group cursor-zoom-in",
+                                            i === 0 && tool.screenshots!.length % 2 !== 0 && "md:col-span-2"
+                                        )}>
+                                            <img
+                                                src={shot}
+                                                alt={`${tool.name} screenshot ${i + 1}`}
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Video Demo */}
+                        {tool.videoUrl && (
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-2 mb-6">
+                                    <Play className="h-5 w-5 text-primary" />
+                                    <h3 className="text-2xl font-black font-heading tracking-tight">Video Taqdimot</h3>
+                                </div>
+                                <div className="relative aspect-video rounded-[2.5rem] overflow-hidden border border-border/50 shadow-2xl">
+                                    {/* Handle common video hosts or direct MP4 */}
+                                    {tool.videoUrl.includes('youtube.com') || tool.videoUrl.includes('youtu.be') ? (
+                                        <iframe
+                                            src={`https://www.youtube.com/embed/${tool.videoUrl.split('v=')[1] || tool.videoUrl.split('/').pop()}`}
+                                            className="absolute inset-0 w-full h-full"
+                                            allowFullScreen
+                                        />
+                                    ) : (
+                                        <video
+                                            src={tool.videoUrl}
+                                            controls
+                                            className="absolute inset-0 w-full h-full object-cover"
+                                        />
+                                    )}
+                                </div>
                             </div>
                         )}
 
                         <div className="prose prose-lg dark:prose-invert max-w-none
                             prose-headings:font-bold prose-headings:font-heading prose-headings:tracking-tight
                             prose-h1:text-4xl prose-h1:mb-8
-                            prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border/30
-                            prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
-                            prose-p:leading-8 prose-p:text-muted-foreground prose-p:mb-6 prose-p:font-sans
+                            prose-h2:text-4xl prose-h2:mt-16 prose-h2:mb-8 prose-h2:pb-4 prose-h2:border-b prose-h2:border-border/30
+                            prose-h3:text-3xl prose-h3:mt-12 prose-h3:mb-6
+                            prose-p:leading-9 prose-p:text-muted-foreground prose-p:mb-8 prose-p:font-sans prose-p:text-xl prose-p:font-light
                             prose-a:text-primary prose-a:no-underline prose-a:font-semibold hover:prose-a:underline hover:prose-a:text-primary/80 transition-colors
-                            prose-li:text-muted-foreground prose-li:my-2
+                            prose-li:text-muted-foreground prose-li:my-3 prose-li:text-lg
                             prose-strong:font-bold prose-strong:text-foreground
-                            prose-img:rounded-2xl prose-img:shadow-lg prose-img:my-10 prose-img:border prose-img:border-border/50
-                            prose-blockquote:border-l-4 prose-blockquote:border-primary/50 prose-blockquote:bg-muted/20 prose-blockquote:px-8 prose-blockquote:py-8 prose-blockquote:rounded-r-2xl prose-blockquote:my-10 prose-blockquote:font-medium prose-blockquote:text-foreground/80 prose-blockquote:not-italic
-                            prose-code:bg-muted prose-code:text-foreground prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:before:content-none prose-code:after:content-none
+                            prose-img:rounded-[2rem] prose-img:shadow-2xl prose-img:my-12 prose-img:border prose-img:border-border/50
+                            prose-blockquote:border-l-8 prose-blockquote:border-primary/50 prose-blockquote:bg-muted/20 prose-blockquote:px-10 prose-blockquote:py-10 prose-blockquote:rounded-r-[2.5rem] prose-blockquote:my-12 prose-blockquote:font-medium prose-blockquote:text-foreground/90 prose-blockquote:not-italic prose-blockquote:text-2xl
+                            prose-code:bg-muted prose-code:text-foreground prose-code:px-2 prose-code:py-1 prose-code:rounded-lg prose-code:before:content-none prose-code:after:content-none
                         ">
                             {tool.content ? (
                                 <MarkdownPreview content={tool.content} />
@@ -279,19 +350,19 @@ export default async function ToolDetailPage({
 
                         {/* Pros & Cons */}
                         {((tool.pros && tool.pros.length > 0) || (tool.cons && tool.cons.length > 0)) && (
-                            <div className="grid md:grid-cols-2 gap-6 pt-8 border-t border-border/50">
+                            <div className="grid md:grid-cols-2 gap-8 pt-12 border-t border-border/50">
                                 {tool.pros && tool.pros.length > 0 && (
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500">
-                                                <CheckCircle2 className="h-5 w-5" />
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                                                <CheckCircle2 className="h-6 w-6" />
                                             </div>
-                                            <h3 className="font-bold text-lg">Afzalliklari</h3>
+                                            <h3 className="font-black text-xl font-heading tracking-tight">Afzalliklari</h3>
                                         </div>
-                                        <ul className="space-y-3">
+                                        <ul className="space-y-4">
                                             {tool.pros.map((pro, i) => (
-                                                <li key={i} className="flex gap-3 text-sm text-foreground/80 group">
-                                                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 mt-2 shrink-0 group-hover:scale-125 transition-transform" />
+                                                <li key={i} className="flex gap-4 text-base text-foreground/80 group bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10">
+                                                    <div className="h-2 w-2 rounded-full bg-emerald-500 mt-2.5 shrink-0 group-hover:scale-150 transition-transform" />
                                                     <span>{pro}</span>
                                                 </li>
                                             ))}
@@ -299,17 +370,17 @@ export default async function ToolDetailPage({
                                     </div>
                                 )}
                                 {tool.cons && tool.cons.length > 0 && (
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2 mb-4">
-                                            <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center text-red-500">
-                                                <XCircle className="h-5 w-5" />
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="h-10 w-10 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500">
+                                                <XCircle className="h-6 w-6" />
                                             </div>
-                                            <h3 className="font-bold text-lg">Kamchiliklari</h3>
+                                            <h3 className="font-black text-xl font-heading tracking-tight">Kamchiliklari</h3>
                                         </div>
-                                        <ul className="space-y-3">
+                                        <ul className="space-y-4">
                                             {tool.cons.map((con, i) => (
-                                                <li key={i} className="flex gap-3 text-sm text-foreground/80 group">
-                                                    <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-2 shrink-0 group-hover:scale-125 transition-transform" />
+                                                <li key={i} className="flex gap-4 text-base text-foreground/80 group bg-rose-500/5 p-4 rounded-2xl border border-rose-500/10">
+                                                    <div className="h-2 w-2 rounded-full bg-rose-500 mt-2.5 shrink-0 group-hover:scale-150 transition-transform" />
                                                     <span>{con}</span>
                                                 </li>
                                             ))}
@@ -319,27 +390,62 @@ export default async function ToolDetailPage({
                             </div>
                         )}
 
-                        {/* Screenshots Gallery - Now separate styling */}
-                        {/* Note: Schema doesn't have screenshots array yet in Drizzle schema but mock did. Assuming not available on DB yet or handled via content images.
-                            If schema has screenshots, we would map them here. Currently schema has `imageUrl`.
-                        */}
+                        {/* Similar Tools Section */}
+                        {similarTools.length > 0 && (
+                            <div className="pt-20 border-t border-border/50 space-y-10">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-3xl font-black font-heading tracking-tight">O'xshash Vositalar</h3>
+                                    <Link href={`/tools?category=${tool.category}`} className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
+                                        Hamasini ko'rish <ArrowUpRight className="h-4 w-4" />
+                                    </Link>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    {similarTools.map((t) => (
+                                        <Link key={t.id} href={`/tools/${t.slug}`} className="group relative bg-card/50 border border-border/50 rounded-[2.5rem] overflow-hidden hover:border-primary/50 transition-all p-4">
+                                            <div className="flex items-center gap-5">
+                                                <div className="w-16 h-16 rounded-2xl bg-background border border-border/50 p-2 shrink-0">
+                                                    <img src={t.logoUrl || ""} alt="" className="w-full h-full object-contain" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <h4 className="font-black text-lg group-hover:text-primary transition-colors truncate">{t.name}</h4>
+                                                    <p className="text-sm text-muted-foreground line-clamp-1 font-light">{t.description}</p>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Discussion Section */}
+                        <DiscussionSection
+                            targetId={tool.id}
+                            targetType="tool"
+                            initialComments={toolDiscussions.map(d => ({
+                                ...d,
+                                upvotes: d.upvotes || 0
+                            }))}
+                            currentUserId={currentUserId}
+                            isEditor={editor}
+                            title="Foydalanuvchilar fikri"
+                        />
 
                         {/* Mobile Bottom Meta */}
-                        <div className="lg:hidden mt-12 pt-8 border-t border-border/50 space-y-6">
+                        <div className="lg:hidden mt-20 pt-12 border-t border-border/50 space-y-8">
                             <ToolActions toolId={tool.id} initialVotes={tool.voteCount || 0} hasVoted={hasLiked} />
                             {tool.tags && tool.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-2">
                                     {tool.tags.map(tag => (
                                         <Link key={tag} href={`/tools?search=${encodeURIComponent(tag)}`}>
-                                            <Badge variant="secondary">#{tag}</Badge>
+                                            <Badge variant="secondary" className="rounded-full px-4 py-1.5 bg-muted text-muted-foreground border-border/50">#{tag}</Badge>
                                         </Link>
                                     ))}
                                 </div>
                             )}
                             {tool.url && (
-                                <Button className="w-full rounded-full font-bold shadow-lg" asChild>
+                                <Button className="w-full rounded-full font-black shadow-lg h-14 text-lg" asChild>
                                     <a href={tool.url} target="_blank" rel="noopener noreferrer">
-                                        Websaytga o'tish <ExternalLink className="ml-2 w-4 h-4" />
+                                        Websaytga o'tish <ExternalLink className="ml-2 w-5 h-5" />
                                     </a>
                                 </Button>
                             )}
@@ -348,7 +454,7 @@ export default async function ToolDetailPage({
 
                     {/* Right Actions (Floating/Sticky) */}
                     <div className="hidden xl:block xl:col-span-1">
-                        <div className="sticky top-32 flex flex-col items-center gap-4">
+                        <div className="sticky top-32 flex flex-col items-center gap-6">
                             <ToolActions vertical toolId={tool.id} initialVotes={tool.voteCount || 0} hasVoted={hasLiked} />
                         </div>
                     </div>

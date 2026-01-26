@@ -35,9 +35,12 @@ export type NewsStatus = "draft" | "pending" | "published" | "rejected";
 import { relations } from "drizzle-orm";
 import { users } from "./users";
 
-export const newsRelations = relations(news, ({ one }) => ({
+import { discussions } from "./discussions";
+
+export const newsRelations = relations(news, ({ one, many }) => ({
     author: one(users, {
         fields: [news.userId],
         references: [users.id],
     }),
+    discussions: many(discussions)
 }));
