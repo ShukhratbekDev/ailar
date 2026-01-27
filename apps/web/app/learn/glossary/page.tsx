@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { glossary } from "@/db/schema";
 import { asc } from "drizzle-orm";
-import { ArrowLeft, Search, Sparkles, BookOpen, Brain, Zap, Layout, Plus, Pencil } from "lucide-react";
+import { Search, Sparkles, BookOpen, Brain, Zap, Layout, Plus, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -45,12 +45,7 @@ export default async function GlossaryPage() {
 
                 <div className="container mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center space-y-8">
-                        <div className="flex items-center justify-between">
-                            <Link href="/learn" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-primary hover:opacity-80 transition-opacity">
-                                <ArrowLeft className="h-3 w-3" />
-                                Akademiya
-                            </Link>
-
+                        <div className="flex items-center justify-end">
                             {editor && (
                                 <Button size="sm" className="rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white border-primary/20 transition-all font-bold gap-2" asChild>
                                     <Link href="/learn/glossary/new">
