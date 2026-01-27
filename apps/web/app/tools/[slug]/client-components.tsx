@@ -14,6 +14,8 @@ import {
     Dialog,
     DialogContent,
     DialogTrigger,
+    DialogTitle,
+    DialogDescription,
 } from "@/components/ui/dialog";
 import { shareToolToSocialMedia, incrementToolView, toggleToolLike } from "@/app/actions/tools";
 import { toast } from "sonner";
@@ -286,6 +288,11 @@ export function ToolGallery({ screenshots, toolName }: { screenshots: string[], 
 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="max-w-[100vw] max-h-[100vh] p-0 border-0 bg-black/95 shadow-none flex items-center justify-center z-[150]">
+                    <DialogTitle className="sr-only">{toolName} vizuallari</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        {toolName} vositasining {currentIndex + 1}-skrinshoti
+                    </DialogDescription>
+
                     <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
                         {/* Close Button */}
                         <Button
