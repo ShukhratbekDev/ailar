@@ -14,7 +14,6 @@ interface GlossaryTerm {
     term: string;
     definition: string;
     category?: string | null;
-    imageUrl?: string | null;
 }
 
 export function GlossaryList({
