@@ -55,6 +55,7 @@ export function QuizView({ quiz, courseSlug }: QuizProps) {
     const progress = ((currentIndex + 1) / quiz.questions.length) * 100;
 
     const handleAnswerSelect = (optionIndex: number) => {
+        if (!currentQuestion) return;
         setAnswers(prev => ({
             ...prev,
             [currentQuestion.id]: optionIndex
@@ -190,6 +191,8 @@ export function QuizView({ quiz, courseSlug }: QuizProps) {
             </Card>
         );
     }
+
+    if (!currentQuestion) return null;
 
     return (
         <Card className="rounded-[2.5rem] border-border/40 bg-card/40 backdrop-blur-xl overflow-hidden">
