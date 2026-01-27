@@ -215,7 +215,7 @@ export default async function LearnPage({ searchParams }: LearnPageProps) {
                         <h2 className="text-3xl md:text-4xl font-black font-heading">Siz uchun tanlangan kurslar</h2>
                     </div>
 
-                    <Suspense fallback={<div className="h-12 w-full max-w-md bg-muted/30 rounded-2xl animate-pulse" />}>
+                    <Suspense fallback={<div className="h-14 w-full max-w-2xl bg-muted/30 rounded-full animate-pulse" />}>
                         <CourseSearch />
                     </Suspense>
                 </div>

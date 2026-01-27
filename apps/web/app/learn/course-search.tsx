@@ -30,23 +30,35 @@ export function CourseSearch() {
     }, [debouncedValue, router, searchParams]);
 
     return (
-        <div className="relative group flex-1 max-w-md">
-            <div className="absolute inset-x-0 -bottom-1 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Kurslarni qidirish..."
-                className="h-12 pl-12 pr-10 bg-muted/30 border-0 rounded-2xl focus-visible:ring-1 focus-visible:ring-primary/20 transition-all"
-            />
-            {searchTerm && (
-                <button
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                    <X className="h-4 w-4" />
-                </button>
-            )}
+        <div className="relative group w-full max-w-2xl">
+            {/* Background Glow Effect - Always slightly visible for better discoverability */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-primary/20 to-purple-500/20 rounded-[2rem] blur-xl opacity-30 group-focus-within:opacity-100 transition-opacity duration-500" />
+
+            <div className="relative flex items-center">
+                <div className="absolute left-5 text-muted-foreground group-focus-within:text-blue-500 transition-colors duration-300">
+                    <Search className="h-5 w-5" />
+                </div>
+
+                <Input
+                    className="h-14 pl-14 pr-12 rounded-full border-blue-500/20 bg-background shadow-xl focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300 text-lg placeholder:text-muted-foreground/70"
+                    placeholder="Kurslarni qidirish..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+
+                {searchTerm && (
+                    <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-4 p-2 rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-200"
+                        title="Tozalash"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                )}
+            </div>
+
+            {/* Decorative bottom line - Always slightly visible */}
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/30 to-transparent opacity-100 group-focus-within:via-blue-500 transition-all duration-500" />
         </div>
     );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GlossarySearch } from "./glossary-search";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Pencil, Layout, Zap, Search } from "lucide-react";
 import Link from "next/link";
 import { DeleteButton } from "../[slug]/delete-button";
 import { deleteGlossaryTerm } from "@/app/actions/education-client";
+import { cn } from "@/lib/utils";
 
 interface GlossaryTerm {
     id: number;
@@ -24,6 +25,7 @@ export function GlossaryList({
     editor: boolean
 }) {
     const [filteredTerms, setFilteredTerms] = useState(initialTerms);
+    const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
     // Group terms by first letter
     const groupedTerms: Record<string, GlossaryTerm[]> = {};
@@ -34,6 +36,35 @@ export function GlossaryList({
     });
 
     const letters = Object.keys(groupedTerms).sort();
+
+    // Scroll highlighting logic
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const letter = entry.target.id.replace('letter-', '');
+                        setActiveLetter(letter);
+
+                        // Scroll the active letter into view in the horizontal nav
+                        const navButton = document.querySelector(`[href="#letter-${letter}"]`);
+                        if (navButton) {
+                            navButton.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                        }
+                    }
+                });
+            },
+            {
+                threshold: 0.2,
+                rootMargin: '-10% 0% -80% 0%' // Adjust to trigger when section top is near the top of viewport
+            }
+        );
+
+        const sections = document.querySelectorAll('section[id^="letter-"]');
+        sections.forEach((section) => observer.observe(section));
+
+        return () => observer.disconnect();
+    }, [filteredTerms]);
 
     return (
         <>
@@ -47,7 +78,16 @@ export function GlossaryList({
                             <a
                                 key={letter}
                                 href={`#letter-${letter}`}
-                                className="h-10 w-10 min-w-[40px] rounded-xl border border-border/40 flex items-center justify-center font-black text-sm hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    document.getElementById(`letter-${letter}`)?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className={cn(
+                                    "h-10 w-10 min-w-[40px] rounded-xl border flex items-center justify-center font-black text-sm transition-all duration-300",
+                                    activeLetter === letter
+                                        ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110"
+                                        : "border-border/40 hover:border-primary/40 hover:bg-primary/5 text-muted-foreground hover:text-primary"
+                                )}
                             >
                                 {letter}
                             </a>

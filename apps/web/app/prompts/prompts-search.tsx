@@ -36,7 +36,7 @@ export function PromptsSearch() {
 
     return (
         <div className="relative group w-full max-w-2xl">
-            {/* Background Glow Effect */}
+            {/* Background Glow Effect - Always slightly visible for better discoverability */}
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 via-primary/20 to-blue-500/20 rounded-[2rem] blur-xl opacity-30 group-focus-within:opacity-100 transition-opacity duration-500" />
 
             <div className="relative flex items-center">
@@ -48,9 +48,8 @@ export function PromptsSearch() {
                     )}
                 </div>
 
-                <input
-                    type="text"
-                    className="flex h-14 w-full rounded-full border border-purple-500/20 bg-background px-14 py-2 text-lg ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-purple-500/10 focus-visible:border-purple-500/50 transition-all duration-300 shadow-xl"
+                <Input
+                    className="h-14 pl-14 pr-12 rounded-full border-purple-500/20 bg-background shadow-xl focus:border-purple-500/50 focus:ring-4 focus:ring-purple-500/10 transition-all duration-300 text-lg placeholder:text-muted-foreground/70"
                     placeholder="Promptlarni izlang..."
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
@@ -67,7 +66,7 @@ export function PromptsSearch() {
                 )}
             </div>
 
-            {/* Decorative bottom line */}
+            {/* Decorative bottom line - Always slightly visible */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[1.5px] bg-gradient-to-r from-transparent via-purple-500/30 to-transparent opacity-100 group-focus-within:via-purple-500 transition-all duration-500" />
         </div>
     );
