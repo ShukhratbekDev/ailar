@@ -28,6 +28,15 @@ export function Header() {
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
+    // Helper to determine if a link is the most specific match
+    const getIsActive = (href: string) => {
+        const allLinks = [...navigation.map(n => n.href), "/learn/dashboard"];
+        const bestMatch = allLinks
+            .filter(h => pathname.startsWith(h))
+            .sort((a, b) => b.length - a.length)[0];
+        return bestMatch === href;
+    };
+
     // Lock body scroll when mobile menu is open
     React.useEffect(() => {
         if (mobileMenuOpen) {
@@ -64,7 +73,7 @@ export function Header() {
                         {/* Desktop Navigation */}
                         <nav className="hidden md:flex items-center gap-1">
                             {navigation.map((item) => {
-                                const isActive = pathname.startsWith(item.href);
+                                const isActive = getIsActive(item.href);
                                 return (
                                     <Link
                                         key={item.href}
@@ -87,7 +96,7 @@ export function Header() {
                                         href="/learn/dashboard"
                                         className={cn(
                                             "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200",
-                                            pathname === "/learn/dashboard"
+                                            getIsActive("/learn/dashboard")
                                                 ? "bg-primary/10 text-primary font-semibold"
                                                 : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                                         )}
@@ -155,7 +164,7 @@ export function Header() {
                     <div className="flex flex-col gap-3">
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 px-2 mb-2">Asosiy Menu</p>
                         {navigation.map((item) => {
-                            const isActive = pathname.startsWith(item.href);
+                            const isActive = getIsActive(item.href);
                             const Icon = item.icon;
                             return (
                                 <Link
@@ -193,24 +202,24 @@ export function Header() {
                                     onClick={() => setMobileMenuOpen(false)}
                                     className={cn(
                                         "flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-[0.96] group",
-                                        pathname === "/learn/dashboard"
+                                        getIsActive("/learn/dashboard")
                                             ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20"
                                             : "bg-muted/40 text-foreground hover:bg-muted/60"
                                     )}
                                 >
                                     <div className={cn(
                                         "w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-active:scale-90",
-                                        pathname === "/learn/dashboard" ? "bg-white/20" : "bg-background shadow-sm"
+                                        getIsActive("/learn/dashboard") ? "bg-white/20" : "bg-background shadow-sm"
                                     )}>
                                         <Layout className="h-6 w-6" />
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-lg font-bold leading-none mb-1">Mening Ta&apos;limim</span>
-                                        <span className={cn("text-xs opacity-60", pathname === "/learn/dashboard" ? "text-white/80" : "text-muted-foreground")}>
+                                        <span className={cn("text-xs opacity-60", getIsActive("/learn/dashboard") ? "text-white/80" : "text-muted-foreground")}>
                                             O&apos;quv jarayoni va natijalaringiz
                                         </span>
                                     </div>
-                                    <ChevronRight className={cn("ml-auto h-5 w-5 transition-transform group-hover:translate-x-1", pathname === "/learn/dashboard" ? "opacity-60" : "opacity-20")} />
+                                    <ChevronRight className={cn("ml-auto h-5 w-5 transition-transform group-hover:translate-x-1", getIsActive("/learn/dashboard") ? "opacity-60" : "opacity-20")} />
                                 </Link>
                             </SignedIn>
                         )}
