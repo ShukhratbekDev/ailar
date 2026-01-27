@@ -125,7 +125,7 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 title: result.title || prev.title,
                 description: result.description || prev.description,
                 content: result.content || prev.content,
-                tags: result.tags || prev.tags,
+                tags: Array.isArray(result.tags) ? result.tags.join(',') : (result.tags || prev.tags),
                 readTime: result.readTime?.toString() || prev.readTime,
                 imageUrl: (prev.imageUrl && prev.imageUrl !== '') ? prev.imageUrl : (result.imageUrl || ''),
                 sourceUrl: aiContext.trim().split(/\s+/)[0]?.startsWith('http') ? aiContext.trim().split(/\s+/)[0] || prev.sourceUrl : prev.sourceUrl
@@ -559,7 +559,7 @@ export function CreateNewsForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                     <Label className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Teglar</Label>
                                     <TagInput
                                         placeholder="Enter bosing..."
-                                        tags={formData.tags ? formData.tags.split(',').filter(Boolean).map(t => ({ id: t, text: t.trim() })) : []}
+                                        tags={typeof formData.tags === 'string' && formData.tags ? formData.tags.split(',').filter(Boolean).map(t => ({ id: t, text: t.trim() })) : []}
                                         setTags={(newTags) => {
                                             const tagsArray = typeof newTags === 'function' ? newTags([]) : newTags;
                                             setFormData(prev => ({ ...prev, tags: tagsArray.map(t => t.text).join(',') }));

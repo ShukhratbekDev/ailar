@@ -132,7 +132,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                 toolType: result.toolType || prev.toolType,
                 pricingType: result.pricingType || prev.pricingType,
                 pricingText: result.pricingText || prev.pricingText,
-                tags: result.tags || prev.tags,
+                tags: Array.isArray(result.tags) ? result.tags.join(',') : (result.tags || prev.tags),
                 features: Array.isArray(result.features) ? result.features.join('\n') : prev.features,
                 pros: Array.isArray(result.pros) ? result.pros.join('\n') : prev.pros,
                 cons: Array.isArray(result.cons) ? result.cons.join('\n') : prev.cons,
@@ -776,7 +776,7 @@ export function CreateToolForm({ isAdmin = false }: { isAdmin?: boolean }) {
                                     <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Teglar</Label>
                                     <TagInput
                                         placeholder="Enter bosing..."
-                                        tags={formData.tags ? formData.tags.split(',').filter(Boolean).map(t => ({ id: t, text: t.trim() })) : []}
+                                        tags={typeof formData.tags === 'string' && formData.tags ? formData.tags.split(',').filter(Boolean).map(t => ({ id: t, text: t.trim() })) : []}
                                         setTags={(newTags) => {
                                             const tagsArray = typeof newTags === 'function' ? newTags([]) : newTags;
                                             setFormData(prev => ({ ...prev, tags: tagsArray.map(t => t.text).join(',') }));
