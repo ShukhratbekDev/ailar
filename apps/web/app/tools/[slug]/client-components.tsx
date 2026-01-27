@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Share2, Send, Loader2, CheckCircle, Heart, Globe, ThumbsUp, Sparkles } from "lucide-react";
 import { SocialShare as UnifiedSocialShare } from "@/components/social-share";
+import { useRouter } from "next/navigation";
 import {
     Popover,
     PopoverContent,
@@ -83,9 +84,12 @@ export function ToolLikeButton({ toolId, initialVotes, hasVoted = false }: ToolL
     const [voted, setVoted] = useState(hasVoted);
     const [loading, setLoading] = useState(false);
 
+    const router = useRouter();
+
     const handleVote = async () => {
         if (!userId) {
-            alert("Yoqtirish uchun tizimga kiring.");
+            toast.error("Iltimos, avval tizimga kiring");
+            router.push('/sign-in');
             return;
         }
 
@@ -99,31 +103,40 @@ export function ToolLikeButton({ toolId, initialVotes, hasVoted = false }: ToolL
 
         try {
             await toggleToolLike(toolId);
-            toast.success(newVoted ? "Yoqdi!" : "Yoqtirish bekor qilindi");
+            toast.success(newVoted ? "Yoqdi" : "Yoqmadi");
         } catch (error) {
             // Revert on error
             setVoted(!newVoted);
             setVotes(prev => !newVoted ? prev + 1 : Math.max(0, prev - 1));
-            console.error("Like action failed:", error);
+            toast.error("Xatolik yuz berdi");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Button
-            variant="outline"
-            size="sm"
-            onClick={handleVote}
-            className={cn(
-                "gap-2 transition-all duration-300",
-                voted ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700 dark:bg-red-950/30 dark:border-red-900/50" : "hover:bg-red-50 hover:text-red-600"
-            )}
-            disabled={loading}
-        >
-            <Heart className={cn("h-4 w-4", voted && "fill-current")} />
-            <span>{votes}</span>
-        </Button>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleVote}
+                        className={cn(
+                            "gap-2 transition-all duration-300",
+                            voted ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700 dark:bg-red-950/30 dark:border-red-900/50" : "hover:bg-red-50 hover:text-red-600"
+                        )}
+                        disabled={loading}
+                    >
+                        <Heart className={cn("h-4 w-4", voted && "fill-current")} />
+                        <span>{votes}</span>
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                    <p className="text-xs font-medium">{voted ? "Bekor qilish" : "Yoqdi"}</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
 }
 
@@ -141,18 +154,9 @@ export function ToolActions({
     className?: string
 }) {
     return (
-        <TooltipProvider>
-            <div className={`flex ${vertical ? 'flex-col' : 'items-center'} gap-2 ${className}`}>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <div>
-                            <ToolLikeButton toolId={toolId} initialVotes={initialVotes} hasVoted={hasVoted} />
-                        </div>
-                    </TooltipTrigger>
-                    <TooltipContent><p>{hasVoted ? "Yoqdi" : "Yoqtirish"}</p></TooltipContent>
-                </Tooltip>
-            </div>
-        </TooltipProvider>
+        <div className={`flex ${vertical ? 'flex-col' : 'items-center'} gap-2 ${className}`}>
+            <ToolLikeButton toolId={toolId} initialVotes={initialVotes} hasVoted={hasVoted} />
+        </div>
     );
 }
 

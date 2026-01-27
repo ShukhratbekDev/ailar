@@ -4,11 +4,15 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MessageSquare, Send, Trash2, Reply, Loader2, ThumbsUp } from 'lucide-react';
+import { MessageSquare, Send, Trash2, Reply, Loader2, Heart } from 'lucide-react';
 import { addDetailedDiscussion, deleteDetailedDiscussion, toggleDetailedDiscussionLike, DiscussionTargetType } from '@/app/actions/discussions';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { uz } from 'date-fns/locale';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export interface Comment {
     id: number;
@@ -20,6 +24,69 @@ export interface Comment {
     upvotes: number;
     createdAt: Date;
     replies?: Comment[];
+}
+
+function CommentLikeButton({ commentId, initialUpvotes }: { commentId: number, initialUpvotes: number }) {
+    const { userId } = useAuth();
+    const router = useRouter();
+    const [liked, setLiked] = useState(false); // Since we don't have initial state from server yet
+    const [count, setCount] = useState(initialUpvotes);
+    const [isPending, setIsPending] = useState(false);
+
+    const handleLike = async () => {
+        if (!userId) {
+            toast.error("Iltimos, avval tizimga kiring");
+            router.push('/sign-in');
+            return;
+        }
+
+        if (isPending) return;
+
+        const newLiked = !liked;
+        setLiked(newLiked);
+        setCount(prev => newLiked ? prev + 1 : Math.max(0, prev - 1));
+        setIsPending(true);
+
+        try {
+            const result = await toggleDetailedDiscussionLike(commentId);
+            setLiked(result.liked);
+            toast.success(result.liked ? "Yoqdi" : "Yoqmadi");
+        } catch {
+            // Revert on error
+            setLiked(!newLiked);
+            setCount(prev => !newLiked ? prev + 1 : Math.max(0, prev - 1));
+            toast.error("Xatolik");
+        } finally {
+            setIsPending(false);
+        }
+    };
+
+    return (
+        <TooltipProvider>
+            <div className="flex items-center gap-1">
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                                "h-8 w-8 rounded-full transition-colors",
+                                liked ? "text-rose-500 hover:bg-rose-500/10" : "text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10"
+                            )}
+                            onClick={handleLike}
+                            disabled={isPending}
+                        >
+                            <Heart className={cn("h-4 w-4", liked && "fill-current")} />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                        <p className="text-xs font-medium">{liked ? "Bekor qilish" : "Yoqdi"}</p>
+                    </TooltipContent>
+                </Tooltip>
+                <span className="text-xs font-bold text-muted-foreground mr-2">{count}</span>
+            </div>
+        </TooltipProvider>
+    );
 }
 
 interface DiscussionSectionProps {
@@ -35,6 +102,8 @@ export function DiscussionSection({ targetId, targetType, initialComments, curre
     const [content, setContent] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [replyTo, setReplyTo] = useState<number | null>(null);
+    const { userId } = useAuth();
+    const router = useRouter();
 
     const handleSubmit = async (parentId?: number) => {
         if (!content.trim()) return;
@@ -84,28 +153,8 @@ export function DiscussionSection({ targetId, targetType, initialComments, curre
                             {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: uz })}
                         </span>
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 rounded-full text-muted-foreground hover:text-emerald-500"
-                            onClick={async () => {
-                                try {
-                                    const result = await toggleDetailedDiscussionLike(comment.id);
-                                    if (result.liked) {
-                                        toast.success("Yoqdi");
-                                    } else {
-                                        toast.success("Yoqmadi");
-                                    }
-                                } catch {
-                                    toast.error("Xatolik");
-                                }
-                            }}
-                        >
-                            <ThumbsUp className="h-4 w-4" />
-                        </Button>
-                        <span className="text-xs font-bold text-muted-foreground mr-2">{comment.upvotes || 0}</span>
-
+                    <div className="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <CommentLikeButton commentId={comment.id} initialUpvotes={comment.upvotes} />
                         {!isReply && (
                             <Button
                                 variant="ghost"

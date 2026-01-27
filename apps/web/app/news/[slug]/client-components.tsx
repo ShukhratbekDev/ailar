@@ -30,18 +30,9 @@ export function ArticleActions({
     className?: string
 }) {
     return (
-        <TooltipProvider>
-            <div className={`flex ${vertical ? 'flex-col' : 'items-center'} gap-2 ${className}`}>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <div>
-                            <LikeButton newsId={newsId} initialLikes={initialLikes} hasLiked={hasLiked} />
-                        </div>
-                    </TooltipTrigger>
-                    <TooltipContent><p>{hasLiked ? "Yoqdi" : "Yoqtirish"}</p></TooltipContent>
-                </Tooltip>
-            </div>
-        </TooltipProvider>
+        <div className={`flex ${vertical ? 'flex-col' : 'items-center'} gap-2 ${className}`}>
+            <LikeButton newsId={newsId} initialLikes={initialLikes} hasLiked={hasLiked} />
+        </div>
     );
 }
 
