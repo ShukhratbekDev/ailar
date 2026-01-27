@@ -81,7 +81,7 @@ export function CreateGlossaryForm({ initialData, action }: CreateGlossaryFormPr
                             id="category"
                             name="category"
                             placeholder="Masalan: Modellar, Asoslar"
-                            defaultValue={initialData?.category}
+                            defaultValue={initialData?.category ?? undefined}
                             className="h-12 rounded-xl bg-background/50"
                         />
                     </div>
@@ -93,7 +93,7 @@ export function CreateGlossaryForm({ initialData, action }: CreateGlossaryFormPr
                             name="definition"
                             placeholder="Atama haqida batafsil tushuntirish..."
                             required
-                            defaultValue={initialData?.definition}
+                            defaultValue={initialData?.definition ?? ""}
                             className="min-h-[150px] rounded-xl bg-background/50 resize-none p-4"
                         />
                     </div>
