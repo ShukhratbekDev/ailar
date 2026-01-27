@@ -25,7 +25,6 @@ export function GlossaryList({
     editor: boolean
 }) {
     const [filteredTerms, setFilteredTerms] = useState(initialTerms);
-    const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
     // Group terms by first letter
     const groupedTerms: Record<string, GlossaryTerm[]> = {};
@@ -36,6 +35,7 @@ export function GlossaryList({
     });
 
     const letters = Object.keys(groupedTerms).sort();
+    const [activeLetter, setActiveLetter] = useState<string | null>(letters[0] || null);
 
     // Scroll highlighting logic
     useEffect(() => {
@@ -55,8 +55,8 @@ export function GlossaryList({
                 });
             },
             {
-                threshold: 0.2,
-                rootMargin: '-10% 0% -80% 0%' // Adjust to trigger when section top is near the top of viewport
+                threshold: [0, 0.1, 0.5],
+                rootMargin: '-15% 0% -70% 0%'
             }
         );
 
@@ -101,10 +101,22 @@ export function GlossaryList({
                 {letters.length > 0 ? (
                     <div className="grid gap-20">
                         {letters.map(letter => (
-                            <section key={letter} id={`letter-${letter}`} className="scroll-mt-32">
-                                <div className="flex items-center gap-6 mb-10">
-                                    <h2 className="text-6xl font-black font-heading text-primary/20 dark:text-primary/60 select-none">{letter}</h2>
-                                    <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
+                            <section key={letter} id={`letter-${letter}`} className="scroll-mt-48 transition-all duration-700">
+                                <div className="flex items-center gap-6 mb-10 group/section">
+                                    <h2 className={cn(
+                                        "text-7xl font-black font-heading transition-all duration-500 select-none",
+                                        activeLetter === letter
+                                            ? "text-primary opacity-100 scale-110 translate-x-2"
+                                            : "text-primary/10 dark:text-primary/40 opacity-50"
+                                    )}>
+                                        {letter}
+                                    </h2>
+                                    <div className={cn(
+                                        "h-px flex-1 transition-all duration-500",
+                                        activeLetter === letter
+                                            ? "bg-gradient-to-r from-primary via-primary/50 to-transparent"
+                                            : "bg-gradient-to-r from-border/80 to-transparent"
+                                    )} />
                                 </div>
 
                                 <div className="grid gap-6">
