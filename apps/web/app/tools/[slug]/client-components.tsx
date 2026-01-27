@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Share2, Send, Loader2, CheckCircle, Heart, Globe, ThumbsUp, Sparkles, Layout } from "lucide-react";
+import { Share2, Send, Loader2, CheckCircle, Heart, Globe, ThumbsUp, Sparkles, Layout, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { SocialShare as UnifiedSocialShare } from "@/components/social-share";
 import { useRouter } from "next/navigation";
 import {
@@ -224,44 +224,119 @@ export function ToolAdminActions({ toolId }: { toolId: number }) {
 }
 
 export function ToolGallery({ screenshots, toolName }: { screenshots: string[], toolName: string }) {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleNext = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setCurrentIndex((prev) => (prev + 1) % screenshots.length);
+    };
+
+    const handlePrev = (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setCurrentIndex((prev) => (prev - 1 + screenshots.length) % screenshots.length);
+    };
+
+    const openImage = (index: number) => {
+        setCurrentIndex(index);
+        setIsOpen(true);
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!isOpen) return;
+            if (e.key === "ArrowRight") handleNext();
+            if (e.key === "ArrowLeft") handlePrev();
+            if (e.key === "Escape") setIsOpen(false);
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen]);
+
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-2 mb-6">
                 <Layout className="h-5 w-5 text-primary" />
                 <h3 className="text-2xl font-black font-heading tracking-tight">Vizuallar</h3>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {screenshots.map((shot, i) => (
-                    <Dialog key={i}>
-                        <DialogTrigger asChild>
-                            <div className={cn(
-                                "relative rounded-3xl overflow-hidden border border-border/50 bg-muted/20 aspect-video group cursor-zoom-in",
-                                i === 0 && screenshots.length % 2 !== 0 && "md:col-span-2"
-                            )}>
-                                <img
-                                    src={shot}
-                                    alt={`${toolName} screenshot ${i + 1}`}
-                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <div className="bg-white/20 backdrop-blur-md p-3 rounded-full border border-white/30 text-white transform scale-90 group-hover:scale-100 transition-all duration-300">
-                                        <Sparkles className="w-6 h-6" />
-                                    </div>
-                                </div>
+                    <div
+                        key={i}
+                        onClick={() => openImage(i)}
+                        className={cn(
+                            "relative rounded-3xl overflow-hidden border border-border/50 bg-muted/20 aspect-video group cursor-zoom-in",
+                            i === 0 && screenshots.length % 2 !== 0 && "md:col-span-2"
+                        )}
+                    >
+                        <img
+                            src={shot}
+                            alt={`${toolName} screenshot ${i + 1}`}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <div className="bg-white/20 backdrop-blur-md p-3 rounded-full border border-white/30 text-white transform scale-90 group-hover:scale-100 transition-all duration-300">
+                                <Sparkles className="w-6 h-6" />
                             </div>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 border-0 bg-transparent shadow-none">
-                            <div className="relative w-full h-full flex items-center justify-center">
-                                <img
-                                    src={shot}
-                                    alt={`${toolName} screenshot ${i + 1}`}
-                                    className="max-w-full max-h-[90vh] object-contain rounded-2xl md:rounded-3xl shadow-2xl"
-                                />
-                            </div>
-                        </DialogContent>
-                    </Dialog>
+                        </div>
+                    </div>
                 ))}
             </div>
+
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                <DialogContent className="max-w-[100vw] max-h-[100vh] p-0 border-0 bg-black/95 shadow-none flex items-center justify-center z-[150]">
+                    <div className="relative w-full h-full flex items-center justify-center p-4 md:p-12">
+                        {/* Close Button */}
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setIsOpen(false)}
+                            className="absolute top-6 right-6 z-[160] h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 backdrop-blur-xl transition-all"
+                        >
+                            <X className="h-6 w-6" />
+                        </Button>
+
+                        {/* Navigation Buttons */}
+                        {screenshots.length > 1 && (
+                            <>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handlePrev}
+                                    className="absolute left-4 md:left-8 z-[160] h-14 w-14 rounded-full bg-white/5 hover:bg-white/15 text-white border border-white/10 backdrop-blur-lg transition-all"
+                                >
+                                    <ChevronLeft className="h-8 w-8" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleNext}
+                                    className="absolute right-4 md:right-8 z-[160] h-14 w-14 rounded-full bg-white/5 hover:bg-white/15 text-white border border-white/10 backdrop-blur-lg transition-all"
+                                >
+                                    <ChevronRight className="h-8 w-8" />
+                                </Button>
+                            </>
+                        )}
+
+                        {/* Main Image Container */}
+                        <div className="relative max-w-7xl max-h-full flex flex-col items-center gap-6">
+                            <img
+                                src={screenshots[currentIndex]}
+                                alt={`${toolName} screenshot ${currentIndex + 1}`}
+                                className="max-w-full max-h-[80vh] object-contain rounded-xl md:rounded-2xl shadow-2xl ring-1 ring-white/10 animate-in zoom-in-95 duration-300"
+                            />
+
+                            {/* Caption/Counter */}
+                            <div className="px-6 py-2.5 rounded-full bg-white/10 border border-white/10 backdrop-blur-xl text-white/90 text-sm font-medium flex items-center gap-4">
+                                <span className="opacity-60">{currentIndex + 1} / {screenshots.length}</span>
+                                <div className="w-px h-3 bg-white/20" />
+                                <span>{toolName} vizuali</span>
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
