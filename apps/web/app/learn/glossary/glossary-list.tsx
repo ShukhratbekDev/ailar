@@ -63,7 +63,7 @@ export function GlossaryList({
                         {letters.map(letter => (
                             <section key={letter} id={`letter-${letter}`} className="scroll-mt-32">
                                 <div className="flex items-center gap-6 mb-10">
-                                    <h2 className="text-6xl font-black font-heading text-primary/10 select-none">{letter}</h2>
+                                    <h2 className="text-6xl font-black font-heading text-primary/10 dark:text-primary/50 select-none">{letter}</h2>
                                     <div className="h-px flex-1 bg-gradient-to-r from-border/80 to-transparent" />
                                 </div>
 
