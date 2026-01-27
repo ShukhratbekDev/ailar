@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Share2, Send, Loader2, CheckCircle, Heart, Globe, ThumbsUp, Sparkles } from "lucide-react";
+import { Share2, Send, Loader2, CheckCircle, Heart, Globe, ThumbsUp, Sparkles, Layout } from "lucide-react";
 import { SocialShare as UnifiedSocialShare } from "@/components/social-share";
 import { useRouter } from "next/navigation";
 import {
@@ -10,6 +10,11 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Dialog,
+    DialogContent,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { shareToolToSocialMedia, incrementToolView, toggleToolLike } from "@/app/actions/tools";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -217,3 +222,47 @@ export function ToolAdminActions({ toolId }: { toolId: number }) {
         </div>
     );
 }
+
+export function ToolGallery({ screenshots, toolName }: { screenshots: string[], toolName: string }) {
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center gap-2 mb-6">
+                <Layout className="h-5 w-5 text-primary" />
+                <h3 className="text-2xl font-black font-heading tracking-tight">Vizuallar</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {screenshots.map((shot, i) => (
+                    <Dialog key={i}>
+                        <DialogTrigger asChild>
+                            <div className={cn(
+                                "relative rounded-3xl overflow-hidden border border-border/50 bg-muted/20 aspect-video group cursor-zoom-in",
+                                i === 0 && screenshots.length % 2 !== 0 && "md:col-span-2"
+                            )}>
+                                <img
+                                    src={shot}
+                                    alt={`${toolName} screenshot ${i + 1}`}
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                    <div className="bg-white/20 backdrop-blur-md p-3 rounded-full border border-white/30 text-white transform scale-90 group-hover:scale-100 transition-all duration-300">
+                                        <Sparkles className="w-6 h-6" />
+                                    </div>
+                                </div>
+                            </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 border-0 bg-transparent shadow-none">
+                            <div className="relative w-full h-full flex items-center justify-center">
+                                <img
+                                    src={shot}
+                                    alt={`${toolName} screenshot ${i + 1}`}
+                                    className="max-w-full max-h-[90vh] object-contain rounded-2xl md:rounded-3xl shadow-2xl"
+                                />
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+                ))}
+            </div>
+        </div>
+    );
+}
+

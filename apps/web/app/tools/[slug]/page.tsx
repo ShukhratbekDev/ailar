@@ -19,7 +19,7 @@ import {
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import { isEditor, isAdmin } from "@/lib/auth";
-import { ToolViewTracker, ScrollProgress, ToolFloatingActionBar, SocialShare, ToolLikeButton, ToolActions, ToolAdminActions } from "./client-components";
+import { ToolViewTracker, ScrollProgress, ToolFloatingActionBar, SocialShare, ToolLikeButton, ToolActions, ToolAdminActions, ToolGallery } from "./client-components";
 import { db } from "@/db";
 import { tools, toolLikes, discussions } from "@/db/schema";
 import { eq, and, ne, desc } from "drizzle-orm";
@@ -280,26 +280,7 @@ export default async function ToolDetailPage({
 
                         {/* Screenshots Gallery */}
                         {tool.screenshots && tool.screenshots.length > 0 && (
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-2 mb-6">
-                                    <Layout className="h-5 w-5 text-primary" />
-                                    <h3 className="text-2xl font-black font-heading tracking-tight">Vizuallar</h3>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {tool.screenshots.map((shot, i) => (
-                                        <div key={i} className={cn(
-                                            "relative rounded-3xl overflow-hidden border border-border/50 bg-muted/20 aspect-video group cursor-zoom-in",
-                                            i === 0 && tool.screenshots!.length % 2 !== 0 && "md:col-span-2"
-                                        )}>
-                                            <img
-                                                src={shot}
-                                                alt={`${tool.name} screenshot ${i + 1}`}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <ToolGallery screenshots={tool.screenshots} toolName={tool.name} />
                         )}
 
                         {/* Video Demo */}
