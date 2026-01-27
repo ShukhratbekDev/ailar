@@ -1,6 +1,6 @@
 import { isEditor } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { CreateLessonForm } from "../../new/create-lesson-form";
+import { CreateLessonForm } from "@/app/learn/new/create-lesson-form";
 import { db } from "@/db";
 import { courses } from "@/db/schema";
 import { asc } from "drizzle-orm";

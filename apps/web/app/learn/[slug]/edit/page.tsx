@@ -2,7 +2,7 @@ import { db } from "@/db";
 import { courses } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
-import { CreateCourseForm } from "../../new/create-course-form";
+import { CreateCourseForm } from "@/app/learn/new/create-course-form";
 import { updateCourse } from "@/app/actions/education";
 import { isEditor } from "@/lib/auth";
 
